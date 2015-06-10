@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Pint Journal</title>
+    </head>
+
+    <body>
+        <h1>Pint Journal</h1>
+
+        <h2> Recent Beers </h2>
+
+        {% if beers %}
+            <ul>
+                {% for beer in beers %}
+            <li><a href = "/pint-journal/beer/{{ beer.slug }}">{{ beer.name }}</a></li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <strong>There are no beers present.</strong>
+        {% endif %}
+
+
+        <h2> Recent Breweries </h2>
+            {% if breweries %}
+            <ul>
+                {% for b in breweries %}
+                <li><a href = "\pint-journal/brewery/{{ brewerly.slug }}">{{ b.name }}</a></li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <strong>There are no breweries present.</strong>
+        {% endif %}
+
+    </body>
+
+</html>

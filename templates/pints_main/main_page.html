@@ -12,7 +12,7 @@
         {% if beers %}
             <ul>
                 {% for beer in beers %}
-            <li><a href = "/pint-journal/beer/{{ beer.slug }}">{{ beer.name }}</a></li>
+            <li><a href = "/beer/{{ beer.slug }}">{{ beer.name }}</a></li>
                 {% endfor %}
             </ul>
         {% else %}
@@ -24,7 +24,7 @@
             {% if breweries %}
             <ul>
                 {% for b in breweries %}
-                <li><a href = "\pint-journal/brewery/{{ brewerly.slug }}">{{ b.name }}</a></li>
+                <li><a href = "/brewery/{{ b.slug }}">{{ b.name }}</a></li>
                 {% endfor %}
             </ul>
         {% else %}

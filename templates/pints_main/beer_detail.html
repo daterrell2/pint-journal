@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Pint Journal: {{brewery.name }} - {{ beer.name }}</title>
+    </head>
+
+    <body>
+        <h1>{{ beer.name }}</h1>
+
+        <div class = "beer_details">
+
+            <h2>{{ brewery.name }}</h2>
+            <h3>{{ beer.beer_style }}</h3>
+
+            <div class = "beer_scores">
+
+            {% if beer_score %}
+                {{ beer_score.score }} - rated on {{ beer_score.score_date }}
+
+            
+            {% else %}
+                <div class = "add_score">
+                    This beer has not been rated. Rate now?
+                </div>
+            {% endif %}
+
+            </div>
+
+        <br>See all beers from <a href = "/brewery/{{ brewery.slug }}">{{ brewery.name }}</a>?
+
+        </div>
+        
+    </body>
+
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Pint Journal: {{ brewery.name }}</title>
+    </head>
+
+    <body>
+        <h1>{{ brewery.name }}</h1>
+
+        <div class = "brewery_details">
+            <h2>
+                {{ brewery.country }}, 
+                {{ brewery.brew_type }}
+            </h2>
+            {% if brewery.url %}
+                <br>{{ brewery.url }}<br>
+            {% endif %}
+
+        </div>
+
+        <div class = "brewery_beer_details">
+
+            {% if beers %}
+                <ul>
+                    {% for b in beers %}
+                        <li><a href = "/beer/{{ b.slug }}">{{ b.name }}</a> - {{ b.get_top_score }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <strong>We don't have any beers for {{ brewery.name }}.</strong>
+            {% endif %}
+
+        </div>
+        <br> Back to <a href = "/"> home </a>?
+    </body>
+
+</html>

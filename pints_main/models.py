@@ -17,6 +17,9 @@ class Brewery(models.Model):
 	def __unicode__(self):
 		return self.name
 
+	def get_beers(self):
+		return Beer.objects.filter(brewery = self).order_by('-date_added')
+
 class Beer(models.Model):
 	brewery = models.ForeignKey(Brewery)
 	name = models.CharField(max_length=128)
@@ -36,11 +39,23 @@ class Beer(models.Model):
 	def __unicode__(self):
 		return self.name
 
+	def get_top_score(self):
+		try:
+			top_score = Beer_Score.objects.filter(beer = self).order_by('-score_date')[0]
+			return top_score
+
+		except IndexError:
+			return None
+
 class Beer_Score(models.Model):
 	beer = models.ForeignKey(Beer)
 	score = models.IntegerField()
 	score_date = models.DateTimeField(auto_now = True)	
 	#user = models.ForeignKey('django.contrib.auth.models.User')
+
+	def __unicode__(self):
+		return str(self.score)
+
 
 #class Beer_Style_Lookup(models.Model):
 

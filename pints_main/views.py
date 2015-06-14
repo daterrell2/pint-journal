@@ -80,8 +80,8 @@ def add_brewery(request):
 	return render(request, 'pints_main/add_brewery.html', {'form':form})
 
 def add_beer(request, brewery_name_slug):
-	
-	try:
+ 
+ 	try:
 		brewery = Brewery.objects.get(slug=brewery_name_slug)
 
 	except Brewery.DoesNotExist:
@@ -107,3 +107,46 @@ def add_beer(request, brewery_name_slug):
 	context_dict={'form':form, 'brewery':brewery}
 
 	return render(request, 'pints_main/add_beer.html', context_dict)
+
+def edit_beer(request, beer_name_slug):
+
+	try:
+		beer = Beer.objects.get(slug=beer_name_slug)
+
+	except Beer.DoesNotExist:
+		redirect('main_page')
+
+	if request.method=='POST':
+		form = BeerForm(request.POST, instance = beer)
+
+		if form.is_valid():
+				beer = form.save(commit=False)
+				beer.save()
+				return redirect(beer.get_absolute_url())
+
+		else:
+			print form.errors
+
+	else:
+		form = BeerForm(instance = beer)
+
+	context_dict={'form':form, 'beer':beer}
+
+	return render(request, 'pints_main/edit_beer.html', context_dict)
+
+def delete_beer(request, beer_name_slug):
+
+	try:
+		beer = Beer.objects.get(slug=beer_name_slug)
+		brewery = beer.brewery
+
+	except:
+		redirect('main_page')
+
+	if request.method=='POST':
+		beer.delete()
+		return redirect(brewery.get_absolute_url())
+	else:
+		return render(request, 'pints_main/delete_beer.html', {'beer':beer})
+
+

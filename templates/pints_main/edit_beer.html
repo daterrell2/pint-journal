@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Pint Journal: {{beer.brewery.name }} - {{ beer.name }}</title>
+    </head>
+
+    <body>
+    	<h1> Edit {{ beer.name }}</h1>
+
+		<form id="beer_form" method="post" action="{{ beer.get_absolute_url }}/edit_beer/">
+
+			{% csrf_token %}
+			{% for hidden in form.hidden_fields %}
+				{{ hidden }}
+			{% endfor %}
+
+			{% for field in form.visible_fields %}
+				{{field.help_text }}: {{ field }}  {{ field.errors }}
+				<br><br>
+			{% endfor %}
+
+			<input type="submit" name="submit" value="Save Changes">
+		</form>
+
+		<br>
+		<a href = "{{ beer.get_absolute_url }}/delete_beer/"> Delete this beer </a>
+
+		<br><br>
+		<a href = "{{ beer.get_absolute_url }}">Back to beer page </a>
+	</body>
+</html>
+

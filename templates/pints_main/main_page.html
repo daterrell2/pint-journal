@@ -24,7 +24,7 @@
             {% if breweries %}
             <ul>
                 {% for b in breweries %}
-                <li><a href = "{{ brewery.get_absolute_url }}">{{ b.name }}</a></li>
+                <li><a href = "{{ b.get_absolute_url }}">{{ b.name }}</a></li>
                 {% endfor %}
             </ul>
         {% else %}

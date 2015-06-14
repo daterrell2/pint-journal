@@ -1,5 +1,7 @@
 from django.db import models
-from django.template.defaultfilters import slugify
+#from django.template.defaultfilters import slugify
+from unidecode import unidecode
+from utils.unique_slugify import unique_slugify
 
 class Brewery(models.Model):
 	name = models.CharField(max_length=128, unique=True)
@@ -11,7 +13,7 @@ class Brewery(models.Model):
 	date_modified = models.DateTimeField(auto_now_add = True)
 
 	def save(self, *args, **kwargs):
-		self.slug = slugify(self.name)
+		unique_slugify(self, unidecode(self.name))
 		super(Brewery, self).save(*args, **kwargs)
 
 	def __unicode__(self):
@@ -32,8 +34,9 @@ class Beer(models.Model):
 		unique_together = ('brewery', 'name')
 
 	def save(self, *args, **kwargs):
-		unique_name = '-'.join([self.brewery.name, self.name])
-		self.slug = slugify(unique_name)
+		unique_name = '%s-%s' %(self.brewery.name, self.name)
+		unique_slugify(self, unique_name)
+		#self.slug = urllib.quote(unique_name)
 		super(Beer, self).save(*args, **kwargs)
 
 	def __unicode__(self):

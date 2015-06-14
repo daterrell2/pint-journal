@@ -7,7 +7,7 @@
     <body>
     	<h1> New beer for {{ brewery.name }}</h1>
 
-		<form id="beer_form" method="post" action="/brewery/{{ brewery.slug }}/add_beer/">
+		<form id="beer_form" method="post" action="{{ brewery.get_absolute_url }}/add_beer/">
 
 			{% csrf_token %}
 			{% for hidden in form.hidden_fields %}
@@ -23,7 +23,7 @@
 		</form>
 
 		<br><br>
-		<a href = "/brewery/{{ brewery.slug }}/">Back to brewery page </a>
+		<a href = "{{ brewery.get_absolute_url }}">Back to brewery page </a>
 	</body>
 </html>
 

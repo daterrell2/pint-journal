@@ -22,6 +22,9 @@ class Brewery(models.Model):
 	def get_beers(self):
 		return Beer.objects.filter(brewery = self).order_by('-date_added')
 
+	def get_absolute_url(self):
+		return '/brewery/%s' % self.slug
+
 class Beer(models.Model):
 	brewery = models.ForeignKey(Brewery)
 	name = models.CharField(max_length=128)
@@ -49,6 +52,9 @@ class Beer(models.Model):
 
 		except IndexError:
 			return None
+
+	def get_absolute_url(self):
+		return '/beer/%s' % self.slug
 
 class Beer_Score(models.Model):
 	beer = models.ForeignKey(Beer)

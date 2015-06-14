@@ -23,7 +23,7 @@
             {% if beers %}
                 <ul>
                     {% for b in beers %}
-                        <li><a href = "/beer/{{ b.slug }}">{{ b.name }}</a> - {{ b.get_top_score }}</li>
+                        <li><a href = "{{ b.get_absolute_url }}">{{ b.name }}</a> - {{ b.get_top_score }}</li>
                     {% endfor %}
                 </ul>
             {% else %}
@@ -31,7 +31,7 @@
             {% endif %}
 
         <br><br>
-        <a href = "/brewery/{{ brewery.slug }}/add_beer/"> Add a new beer </a>
+        <a href = "{{ brewery.get_absolute.url }}/add_beer/"> Add a new beer </a>
 
         </div>
         <br> Back to <a href = "/"> home </a>?

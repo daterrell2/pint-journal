@@ -5,11 +5,11 @@
     </head>
 
     <body>
-        <h1>{{ beer.name }} ({{ beer.beer_style }})</h1>
+        <h1>{{ beer.name }} ({{ beer.beer_style }})</h1> <a href = "{{ beer.get_absolute_url }}/edit_beer/"> edit </a>
 
         <div class = "beer_details">
 
-            <h2><a href = "{{ brewery.get_absolute_url }}> {{ brewery.name }}"</a></h2>
+            <h2><a href = "{{ brewery.get_absolute_url }}"> {{ brewery.name }}</a></h2>
 
             <div class = "beer_scores">
 

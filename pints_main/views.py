@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from pints_main.models import Brewery, Beer, Beer_Score
-from pints_main.forms import BeerForm, BreweryForm, Beer_ScoreForm
+from pints_main.models import Brewery, Beer, BeerScore, UserProfile
+from pints_main.forms import BeerForm, BreweryForm, BeerScoreForm, UserForm, UserProfileForm
+from django.contrib.auth.models import User
 
 def main_page(request):
 	'''
@@ -28,7 +29,7 @@ def beer_detail(request, beer_name_slug):
 		return redirect('/')
 
 	if request.method=='POST':
-		form = Beer_ScoreForm(request.POST)
+		form = BeerScoreForm(request.POST)
 
 		if form.is_valid():
 			if beer:
@@ -36,7 +37,7 @@ def beer_detail(request, beer_name_slug):
 				score.beer=beer
 				score.save()
 
-				form = Beer_ScoreForm() #new blank form
+				form = BeerScoreForm() #new blank form
 
 				return redirect('/beer/'+beer.slug)
 
@@ -44,7 +45,7 @@ def beer_detail(request, beer_name_slug):
 			print form.errors
 
 	else:
-		form = Beer_ScoreForm()
+		form = BeerScoreForm()
 
 	context_dict['form'] = form
 	return render(request, 'pints_main/beer_detail.html', context_dict)
@@ -148,5 +149,42 @@ def delete_beer(request, beer_name_slug):
 		return redirect(brewery.get_absolute_url())
 	else:
 		return render(request, 'pints_main/delete_beer.html', {'beer':beer})
+
+def register(request):
+
+	registered = False
+
+	if request.method == 'POST':
+		user_form = UserForm(data=request.POST)
+		profile_form = UserProfileForm(data=request.POST)
+
+		if user_form.is_valid() and profile_form.is_valid():
+			user = user_form.save()
+			user.set_password(user.password)
+			user.save()
+
+			profile = profile_form.save(commit=False)
+			profile.user = user
+
+			if 'picture' in request.FILES:
+				profile.picture = request.FILES['picture']
+
+			profile.save()
+
+			registered = True
+
+		else:
+			print user_form.errors, profile_form.errors
+
+	else:
+		user_form = UserForm()
+		profile_form = UserProfileForm()
+
+	return render(request, 
+			'pints_main/register.html',
+			{'user_form' : user_form, 'profile_form' : profile_form, 'registered' : registered})
+
+
+
 
 

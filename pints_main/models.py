@@ -1,7 +1,7 @@
 from django.db import models
-#from django.template.defaultfilters import slugify
 from unidecode import unidecode
 from utils.unique_slugify import unique_slugify
+from django.contrib.auth.models import User
 
 class Brewery(models.Model):
 	name = models.CharField(max_length=128, unique=True)
@@ -47,7 +47,7 @@ class Beer(models.Model):
 
 	def get_top_score(self):
 		try:
-			top_score = Beer_Score.objects.filter(beer = self).order_by('-score_date')[0]
+			top_score = BeerScore.objects.filter(beer = self).order_by('-score_date')[0]
 			return top_score
 
 		except IndexError:
@@ -56,7 +56,7 @@ class Beer(models.Model):
 	def get_absolute_url(self):
 		return '/beer/%s' % self.slug
 
-class Beer_Score(models.Model):
+class BeerScore(models.Model):
 	beer = models.ForeignKey(Beer)
 	score = models.IntegerField()
 	score_date = models.DateTimeField(auto_now = True)	
@@ -69,3 +69,19 @@ class Beer_Score(models.Model):
 #class Beer_Style_Lookup(models.Model):
 
 #class Brew_Type_Lookup(models.Mode):
+
+class UserProfile(models.Model):
+	'''
+	Extension of django's built in user model (one-to-one relation)
+	'''
+	user = models.OneToOneField(User)
+
+	# custom user profile fields below
+	picture = models.ImageField(upload_to='profile_images', blank=True)
+
+	def __unicode__(self):
+		return self.user.username
+
+
+
+

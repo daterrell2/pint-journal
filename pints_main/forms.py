@@ -1,5 +1,6 @@
 from django import forms
-from pints_main.models import  Brewery, Beer, Beer_Score
+from pints_main.models import  Brewery, Beer, BeerScore, UserProfile
+from django.contrib.auth.models import User
 
 class BreweryForm(forms.ModelForm):
 	name = forms.CharField(max_length=128, help_text="Brewery Name")
@@ -33,9 +34,26 @@ class BeerForm(forms.ModelForm):
 		model = Beer
 		fields = ('name', 'beer_style')
 
-class Beer_ScoreForm(forms.ModelForm):
+class BeerScoreForm(forms.ModelForm):
 	score = forms.IntegerField(help_text="Score")
 
 	class Meta:
-		model = Beer_Score
+		model = BeerScore
 		fields = ('score',)
+
+class UserForm(forms.ModelForm):
+	password = forms.CharField(widget=forms.PasswordInput())
+
+	class Meta:
+		model = User
+		fields = ('username', 'email', 'password')
+
+class UserProfileForm(forms.ModelForm):
+	class Meta:
+		model = UserProfile
+		fields = ('picture',)
+		
+
+
+
+

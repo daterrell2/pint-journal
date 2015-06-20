@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title> Pint Journal </title>
+	</head>
+
+	<body>
+		<h1> Login to Pint Journal </h1>
+
+		{% if error_message %}
+
+		{{ error_message }}
+
+		{% endif %}
+		
+		<form id="login_form" method="post" action="/login/">
+			{% csrf_token %}
+			Username: <input type="text" name="username" value="{{username}}" size="50" />
+			<br />
+			Password: <input type="password" name="password" value="" size="50" />
+			<br />
+
+			<input type="submit" value="Log In" />
+
+		</form>
+
+	</body>
+
+</html>

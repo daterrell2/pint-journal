@@ -3,6 +3,8 @@ from django.http import HttpResponse
 from pints_main.models import Brewery, Beer, BeerScore, UserProfile
 from pints_main.forms import BeerForm, BreweryForm, BeerScoreForm, UserForm, UserProfileForm
 from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 
 def main_page(request):
 	'''
@@ -64,6 +66,7 @@ def brewery_detail(request, brewery_name_slug):
 
 	return render(request, 'pints_main/brewery_detail.html', context_dict)
 
+@login_required
 def add_brewery(request):
 	if request.method=='POST':
 		form = BreweryForm(request.POST)
@@ -80,6 +83,7 @@ def add_brewery(request):
 
 	return render(request, 'pints_main/add_brewery.html', {'form':form})
 
+@login_required
 def add_beer(request, brewery_name_slug):
  
  	try:
@@ -109,6 +113,7 @@ def add_beer(request, brewery_name_slug):
 
 	return render(request, 'pints_main/add_beer.html', context_dict)
 
+@login_required
 def edit_beer(request, beer_name_slug):
 
 	try:
@@ -135,6 +140,7 @@ def edit_beer(request, beer_name_slug):
 
 	return render(request, 'pints_main/edit_beer.html', context_dict)
 
+@login_required
 def delete_beer(request, beer_name_slug):
 
 	try:
@@ -149,6 +155,9 @@ def delete_beer(request, beer_name_slug):
 		return redirect(brewery.get_absolute_url())
 	else:
 		return render(request, 'pints_main/delete_beer.html', {'beer':beer})
+
+def login_error(request, error_message):
+	return render(reqeust, 'pints_main/login_error.html', {'error_message': error_message})
 
 def register(request):
 
@@ -184,6 +193,45 @@ def register(request):
 			'pints_main/register.html',
 			{'user_form' : user_form, 'profile_form' : profile_form, 'registered' : registered})
 
+def user_login(request):
+
+	#redirect if user is already logged in
+	if request.user.is_authenticated():
+		return redirect('main_page')
+
+	username, error_message = '', ''
+
+	if request.method == 'POST':
+		username = request.POST.get('username')
+		password = request.POST.get('password')
+
+		# built-in django user authentication
+
+		user = authenticate(username=username, password=password)
+
+		if user:
+			
+			if user.is_active:
+				login(request, user)
+
+				return redirect('main_page')
+
+			else:
+				redirect('login_error', error_message='Your account has been deactivated')
+
+		else:
+			print "Invalid login details: {0}, {1}".format(username, password)
+			error_message = 'Invalid Login'
+			return render(request, 'pints_main/login.html', {'username' : username, 'error_message' : error_message})
+
+	else:
+		return render(request, 'pints_main/login.html', {'username' : username, 'error_message' : error_message })
+
+@login_required
+def user_logout(request):
+	
+	logout(request)
+	return redirect('main_page')
 
 
 

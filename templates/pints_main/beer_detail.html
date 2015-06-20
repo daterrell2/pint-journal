@@ -22,6 +22,8 @@
                 {% endif %}
                 <br><br>
 
+                {% if user.is_authenticated %}
+
                 <h3> Rate this beer:</h3>
 
                 <div class = "new_score">
@@ -38,6 +40,7 @@
                         <input type="submit" name="submit" value="Submit!">
                     </form>
                 </div>
+                {% endif %}
 
             </div>
 

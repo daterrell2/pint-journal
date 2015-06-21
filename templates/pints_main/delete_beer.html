@@ -1,19 +1,23 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Pint Journal: {{beer.brewery.name }} - {{ beer.name }}</title>
-    </head>
+{% extends 'detail_page.html' %}
 
-    <body>
-    	Are you sure  you want to delete {{ beer.name }}?
+{% load staticfiles %}
 
-		<form id="beer_delete" method="post" action="{{ beer.get_absolute_url }}/delete_beer/">
-			{% csrf_token %}
-			<input type="submit" name="delete"value= "Delete this beer">
-		</form>
+{% blcok detail_title %} - Delete {{ beer.name }} {% endblock %}
 
-		<br><br>
-		<a href = "{{ beer.get_absolute_url }}/edit_beer">Back to editing page </a>
-	</body>
-</html>
+{% block detail_content %}
+
+<div>
+	Are you sure  you want to delete {{ beer.name }}?
+
+	<form id="beer_delete" method="post" action="{% url 'delete_beer' beer.slug %}">
+		{% csrf_token %}
+		<input type="submit" name="delete"value= "Delete this beer">
+	</form>
+</div>
+
+{% endblock %}
+
+{% block detail_footer %}
+	<a href = "{{ beer.get_absolute_url }}/edit_beer">Back to editing page </a>
+{% endblock %}
 

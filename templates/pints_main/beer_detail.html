@@ -1,53 +1,49 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Pint Journal: {{brewery.name }} - {{ beer.name }}</title>
-    </head>
+{% extends 'detail_page.html' %}
 
-    <body>
-        <h1>{{ beer.name }} ({{ beer.beer_style }})</h1> <a href = "{{ beer.get_absolute_url }}/edit_beer/"> edit </a>
+{% load staticfiles %}
 
-        <div class = "beer_details">
+{% block detail_title %}- {{ beer.name }} {% endblock %}
 
-            <h2><a href = "{{ brewery.get_absolute_url }}"> {{ brewery.name }}</a></h2>
-
-            <div class = "beer_scores">
-
-                {% if beer_score %}
-                    {{ beer_score.score }} - rated on {{ beer_score.score_date }}
-
-                
-                {% else %}
-                        This beer has not been rated yet!
-                {% endif %}
-                <br><br>
-
-                {% if user.is_authenticated %}
-
-                <h3> Rate this beer:</h3>
-
-                <div class = "new_score">
-                    <form id = "beer_score_form" method = "post" action = "{{ beer.get_absolute_url }}/">
-                        {% csrf_token %}
-                        {% for hidden in form.hidden_fields %}
-                            {{ hidden }}
-                        {% endfor %}
-
-                        {% for field in form.visible_fields %}
-                            {{ field.help_text }}: {{ field }}  {{ field.errors }}
-                        {% endfor %}
-                        <br>
-                        <input type="submit" name="submit" value="Submit!">
-                    </form>
-                </div>
-                {% endif %}
-
-            </div>
-
-        <br>Back to <a href = "/">home</a>?
-
+{% block detail_content %}
+    <div>
+       <h1>{{ beer.name }} ({{ beer.beer_style }})</h1>
+        <div>
+            <a href = "{% url 'edit_beer' beer.slug %}"> edit </a>
         </div>
-        
-    </body>
 
-</html>
+        <h2><a href = "{{ brewery.get_absolute_url }}"> {{ brewery.name }}</a></h2>
+
+    </div>
+
+    <div>
+        {% if beer_score %}
+            {{ beer_score.score }} - rated on {{ beer_score.score_date }}
+
+        
+        {% else %}
+                This beer has not been rated yet!
+        {% endif %}
+    </div>
+          
+    {% if user.is_authenticated %}
+    <div>
+
+        <h2> Rate this beer:</h2>
+
+        <div>
+            <form id = "beer_score_form" method = "post" action = "{{ beer.get_absolute_url }}/">
+                {% csrf_token %}
+                {% for hidden in form.hidden_fields %}
+                    {{ hidden }}
+                {% endfor %}
+
+                {% for field in form.visible_fields %}
+                    {{ field.help_text }}: {{ field }}  {{ field.errors }}
+                {% endfor %}
+                <br>
+                <input type="submit" name="submit" value="Submit Score">
+            </form>
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}

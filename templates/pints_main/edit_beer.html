@@ -1,32 +1,39 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Pint Journal: {{beer.brewery.name }} - {{ beer.name }}</title>
-    </head>
+{% extends 'detail_page.html' %}
 
-    <body>
-    	<h1> Edit {{ beer.name }}</h1>
+{% load staticfiles %}
 
-		<form id="beer_form" method="post" action="{{ beer.get_absolute_url }}/edit_beer/">
+{% block detail_title %} - Edit {{ beer.name }} {% endblock %}
 
-			{% csrf_token %}
-			{% for hidden in form.hidden_fields %}
-				{{ hidden }}
-			{% endfor %}
+{% block detail_content %}
+<div>
+	<h1> Edit {{ beer.name }}</h1>
 
-			{% for field in form.visible_fields %}
-				{{field.help_text }}: {{ field }}  {{ field.errors }}
-				<br><br>
-			{% endfor %}
+	<form id="beer_form" method="post" action="{% url 'edit_beer' beer.slug %}">
 
-			<input type="submit" name="submit" value="Save Changes">
-		</form>
+		{% csrf_token %}
+		{% for hidden in form.hidden_fields %}
+			{{ hidden }}
+		{% endfor %}
 
-		<br>
-		<a href = "{{ beer.get_absolute_url }}/delete_beer/"> Delete this beer </a>
+		{% for field in form.visible_fields %}
+			{{field.help_text }}: {{ field }}  {{ field.errors }}
+			<br><br>
+		{% endfor %}
 
-		<br><br>
-		<a href = "{{ beer.get_absolute_url }}">Back to beer page </a>
-	</body>
-</html>
+		<input type="submit" name="submit" value="Save Changes">
+	</form>
+</div>
+
+<div>
+	<a href = "{% url 'delete_beer' beer.slug %}"> Delete this beer </a>
+</div>
+{% endblock %}
+
+{% block detail_footer %}
+<div>
+	<a href = "{{ beer.get_absolute_url }}">Back to beer page </a>
+</div>
+{% endblock %}
+
+
 

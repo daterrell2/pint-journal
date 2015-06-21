@@ -1,23 +1,9 @@
-<!DOCTYPE html>
-<html>
-    <head lang="en">
-        <meta charset="UTF-8">
-        <title>Pint Journal{% block title %}{% endblock %}</title>
-    </head>
+{% extends 'base.html' %}
 
-	<body>
-		<div>
-			<h1>{% block form_title %}User Form{% endblock %}</h1>
-		<div>
+{% load staticfiles %}
 
-		<div>
-			{% block form_block %}{%endblock %}
-		<div>
+{% block title %}{% block detail_title %}{% endblock %}{% endblock %}
 
-		<div>
-			{% block form_footer %}
-				Back to <a href="{% url 'main_page' %}"> home? </a>
-			{% endblock %}
-		</div>
-	</body>
-</html>
+{% block navbar_items %}{% endblock %}
+
+{% block body_block %}{% endblock %}

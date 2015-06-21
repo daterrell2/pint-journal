@@ -1,30 +1,35 @@
-{% extends 'detail_page.html' %}
+{% extends 'base.html' %}
 
 {% load staticfiles %}
 
 {% block detail_title %}- {{ beer.name }} {% endblock %}
 
-{% block detail_content %}
-    <div>
-       <h1>{{ beer.name }} ({{ beer.beer_style }})</h1>
-        <div>
-            <a href = "{% url 'edit_beer' beer.slug %}"> edit </a>
-        </div>
-
-        <h2><a href = "{{ brewery.get_absolute_url }}"> {{ brewery.name }}</a></h2>
-
+{% block body_block %}
+    <div class="page-header">
+        <a href = "{% url 'edit_beer' beer.slug %}"> edit </a>
+       <h1>{{ beer.name }}</h1>
+        <p class="lead"><a href = "{{ brewery.get_absolute_url }}">{{ brewery.name }}</a> - {{ beer.beer_style }}</p>
     </div>
 
-    <div>
-        {% if beer_score %}
-            {{ beer_score.score }} - rated on {{ beer_score.score_date }}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Your Rating</th>
+                    <th>Date Rated</th>
+                    <th>Average Rating</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ beer_score.score }}</td>
+                    <td>{{ beer_score.score_date }}</td>
+                    <td>None</td>
+                </tr>
+            </tbody>
+        </table>
 
-        
-        {% else %}
-                This beer has not been rated yet!
-        {% endif %}
-    </div>
-          
+
     {% if user.is_authenticated %}
     <div>
 

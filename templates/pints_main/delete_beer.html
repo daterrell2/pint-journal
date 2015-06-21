@@ -1,10 +1,10 @@
-{% extends 'detail_page.html' %}
+{% extends 'base.html' %}
 
 {% load staticfiles %}
 
-{% blcok detail_title %} - Delete {{ beer.name }} {% endblock %}
+{% block title%} - Delete {{ beer.name }} {% endblock %}
 
-{% block detail_content %}
+{% block body_block %}
 
 <div>
 	Are you sure  you want to delete {{ beer.name }}?
@@ -15,9 +15,6 @@
 	</form>
 </div>
 
-{% endblock %}
+<a href = "{% url 'edit_beer' beer.slug %}">Back to editing page </a>
 
-{% block detail_footer %}
-	<a href = "{{ beer.get_absolute_url }}/edit_beer">Back to editing page </a>
 {% endblock %}
-

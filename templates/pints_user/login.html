@@ -4,29 +4,24 @@
 
 {% block title %} - Log In {% endblock %}
 
-{% block form_title %} Log In {% endblock %}
+{% block navbar_items %}
+    <li><a href="{% url 'register' %}"> Register Here </a></li>
+{% endblock %}
 
-{% block form_block %}
-	{% if error_message %}
-	<div>
+{% block body_block %}
 
-		{{ error_message }}
-	</div>
+	<link href="/static/css/signin.css" rel="stylesheet">
 
-	{% endif %}
+	<form class="form-signin" role="form" method="post" action="{% url 'user_login' %}">
+		{% csrf_token %}
 
-	<div>	
-		<form id="login_form" method="post" action={% url 'user_login' %}>
-			{% csrf_token %}
-			Username: <input type="text" name="username" value="{{username}}" size="50" />
-			<br />
-			Password: <input type="password" name="password" value="" size="50" />
+		<h2 class="form-signin-heading"> Please Sign In </h2>
+		<input class="form-control" placeholder="Username" id="id_username" max_length="254" name="username" type="text" value="{{username}}" required autofocus="" />
+		
+		<input class="form-control" placeholder="Password" id="id_password" name="password" type="password" required />
 
-			<input type="hidden" name="next" value="{{ next }}" />
-			<br />
+		<input type="hidden" name="next" value="{{ next }}" />
 
-			<input type="submit" value="Log In" />
-
-		</form>
-	</div>
+        <button class="btn btn-lg btn-primary btn-block" type="submit" value="Submit" />Sign in</button>
+	</form>
 {% endblock %}

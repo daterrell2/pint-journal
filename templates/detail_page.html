@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %}{% block detail_title %}{% endblock %}{% endblock %}
+
+{% block body_block %}
+
+<div>
+	{% block detail_content %}
+	{% endblock %}
+</div>
+<div>
+	{% block detail_footer %}
+	{% endblock %}
+	Back to <a href="{% url 'main_page' %}"> home? </a>
+</div>
+
+{% endblock %}

@@ -1,18 +1,21 @@
-<!DOCTYPE html>
-<html>
-	<head>
-		<title> Pint Journal </title>
-	</head>
+{% extends 'user_forms.html' %}
 
-	<body>
-		<h1> Login to Pint Journal </h1>
+{% load staticfiles %}
 
-		{% if error_message %}
+{% block title %} - Log In {% endblock %}
+
+{% block form_title %} Log In {% endblock %}
+
+{% block form_block %}
+	{% if error_message %}
+	<div>
 
 		{{ error_message }}
+	</div>
 
-		{% endif %}
-		
+	{% endif %}
+
+	<div>	
 		<form id="login_form" method="post" action="/login/">
 			{% csrf_token %}
 			Username: <input type="text" name="username" value="{{username}}" size="50" />
@@ -25,7 +28,5 @@
 			<input type="submit" value="Log In" />
 
 		</form>
-
-	</body>
-
-</html>
+	</div>
+{% endblock %}

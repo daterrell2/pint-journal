@@ -1,50 +1,34 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Pint Journal</title>
-    </head>
+{% extends 'base.html' %}
 
-    <body>
-        {% if user.is_authenticated %}
+{% load staticfiles %}
 
-        <h1>Pint Journal - {{ user.username }}</h1>
-        <a href="/logout/"> Log Out </a>
+{% block title %} Home {% endblock %}
 
-        {% else %}
-        <h1> Pint Journal </h1>
+{% block body_block %}
 
-        <a href="/register/"> Register Here </a>
-        <br />
-        <a href="/login/"> Login </a>
+    <h1> Pint Journal </h1>
 
+    <h2> Recent Beers </h2>
 
-        {% endif %}
+    {% if beers %}
+        <ul>
+            {% for beer in beers %}
+        <li><a href = "{{ beer.get_absolute_url }}">{{ beer.name }}</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <strong>There are no beers present.</strong>
+    {% endif %}
 
+    <h2> Recent Breweries </h2>
+        {% if breweries %}
+        <ul>
+            {% for brew in breweries %}
+            <li><a href = "{{ brew.get_absolute_url }}">{{ brew.name }}</a></li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <strong>There are no breweries present.</strong>
+    {% endif %}
 
-        <h2> Recent Beers </h2>
-
-        {% if beers %}
-            <ul>
-                {% for beer in beers %}
-            <li><a href = "{{ beer.get_absolute_url }}">{{ beer.name }}</a></li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <strong>There are no beers present.</strong>
-        {% endif %}
-
-
-        <h2> Recent Breweries </h2>
-            {% if breweries %}
-            <ul>
-                {% for b in breweries %}
-                <li><a href = "{{ b.get_absolute_url }}">{{ b.name }}</a></li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <strong>There are no breweries present.</strong>
-        {% endif %}
-
-    </body>
-
-</html>
+{% endblock %}

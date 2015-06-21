@@ -5,30 +5,31 @@
 {% block title %} Home {% endblock %}
 
 {% block body_block %}
+    <div class="row placeholders">
+        <div class="col-xs-12 col-sm-6 placeholder">
+            <h3> Recent Beers </h3>
 
-    <h1> Pint Journal </h1>
-
-    <h2> Recent Beers </h2>
-
-    {% if beers %}
-        <ul>
-            {% for beer in beers %}
-        <li><a href = "{{ beer.get_absolute_url }}">{{ beer.name }}</a></li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <strong>There are no beers present.</strong>
-    {% endif %}
-
-    <h2> Recent Breweries </h2>
-        {% if breweries %}
-        <ul>
-            {% for brew in breweries %}
-            <li><a href = "{{ brew.get_absolute_url }}">{{ brew.name }}</a></li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <strong>There are no breweries present.</strong>
-    {% endif %}
-
+            {% if beers %}
+                <ul class="list-group">
+                    {% for beer in beers %}
+                <li class="list-group-item"><a href = "{{ beer.get_absolute_url }}">{{ beer.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <strong>There are no beers present.</strong>
+            {% endif %}
+        </div>
+        <div class="col-xs-12 col-sm-6 placeholder">
+            <h3> Recent Breweries </h3>
+            {% if breweries %}
+                <ul class="list-group">
+                    {% for brew in breweries %}
+                    <li class="list-group-item"><a href = "{{ brew.get_absolute_url }}">{{ brew.name }}</a></li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <strong>There are no breweries present.</strong>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}

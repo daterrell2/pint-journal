@@ -1,18 +1,15 @@
-{% extends 'detail_page.html' %}
+{% extends 'base.html' %}
 
 {% load staticfiles %}
 
-{block detail_title %} - New Beer {% endblock %}
+{% block title %} - New Beer {% endblock %}
 
-{% block detail_content %}
-<div>
-    <h1> New beer for {{ brewery.name }}</h1>
-</div>
-
-<div>
-	<form id="beer_form" method="post" action="{% url 'add_beer' brewery.slug %}">
+{% block body_block %}
+	<form role="form" id="beer_form" method="post" action="{% url 'add_beer' brewery.slug %}" />
 
 		{% csrf_token %}
+
+		<h2 class="form-signin-heading"> Add a Beer for <a href="{{ brewery.get_absolute_url }}"> {{ brewery.name }}</a></h2>
 		{% for hidden in form.hidden_fields %}
 			{{ hidden }}
 		{% endfor %}
@@ -22,11 +19,6 @@
 			<br><br>
 		{% endfor %}
 
-		<input type="submit" name="submit" value="Add Beer">
+		<button class="btn btn-primary" type="submit" name="submit">Add Beer </button>
 	</form>
-</div>
-{% endblock %}
-
-{% block detail_footer %}
-	<a href = "{{ brewery.get_absolute_url }}">Back to brewery page </a>
 {% endblock %}

@@ -44,6 +44,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'pints_main',
+    'pints_user',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -116,4 +117,4 @@ STATICFILES_DIRS = (
 
 MEDIA_URL = '/media/'
 
-LOGIN_URL = '/login/'
+LOGIN_URL = '/user/login/'

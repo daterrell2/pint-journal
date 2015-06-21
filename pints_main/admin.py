@@ -1,5 +1,5 @@
 from django.contrib import admin
-from pints_main.models import Brewery, Beer, BeerScore, UserProfile
+from pints_main.models import Brewery, Beer, BeerScore
 
 class BreweryAdmin(admin.ModelAdmin):
 	prepopulated_fields = {'slug':('name',)}
@@ -13,4 +13,3 @@ class BeerScoreAdmin(admin.ModelAdmin):
 admin.site.register(Brewery, BreweryAdmin)
 admin.site.register(Beer, BeerAdmin)
 admin.site.register(BeerScore, BeerScoreAdmin)
-admin.site.register(UserProfile)

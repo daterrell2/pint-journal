@@ -199,33 +199,43 @@ def user_login(request):
 	if request.user.is_authenticated():
 		return redirect('main_page')
 
+	
 	username, error_message = '', ''
 
 	if request.method == 'POST':
 		username = request.POST.get('username')
-		password = request.POST.get('password')
+		password = request.POST.get('password')		
+		next = request.POST.get('next')
 
 		# built-in django user authentication
 
 		user = authenticate(username=username, password=password)
 
 		if user:
-			
+			#valid user and active account: log in and redirect to referer
 			if user.is_active:
 				login(request, user)
+				if next:
+					return redirect(next)
+				else:
+					return redirect('main_page')
 
-				return redirect('main_page')
-
+			# inactive account
 			else:
 				redirect('login_error', error_message='Your account has been deactivated')
-
+		# invalid credentials
 		else:
 			print "Invalid login details: {0}, {1}".format(username, password)
 			error_message = 'Invalid Login'
-			return render(request, 'pints_main/login.html', {'username' : username, 'error_message' : error_message})
+			return render(request, 'pints_main/login.html', {'username' : username, 'error_message' : error_message, "next" : next})
 
 	else:
-		return render(request, 'pints_main/login.html', {'username' : username, 'error_message' : error_message })
+		# initial GET request. 'next' will be hidden input on login form
+		next = request.GET.get('next')
+		if not next:
+			next = '/'
+			
+		return render(request, 'pints_main/login.html', {'username' : username, 'error_message' : error_message, 'next' : next })
 
 @login_required
 def user_logout(request):

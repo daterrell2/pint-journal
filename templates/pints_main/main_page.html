@@ -4,32 +4,38 @@
 
 {% block title %} Home {% endblock %}
 
-{% block body_block %}
-    <div class="row placeholders">
-        <div class="col-xs-12 col-sm-6 placeholder">
-            <h3> Recent Beers </h3>
 
-            {% if beers %}
-                <ul class="list-group">
-                    {% for beer in beers %}
-                <li class="list-group-item"><a href = "{{ beer.get_absolute_url }}">{{ beer.name }}</a></li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <strong>There are no beers present.</strong>
-            {% endif %}
-        </div>
-        <div class="col-xs-12 col-sm-6 placeholder">
-            <h3> Recent Breweries </h3>
-            {% if breweries %}
-                <ul class="list-group">
-                    {% for brew in breweries %}
-                    <li class="list-group-item"><a href = "{{ brew.get_absolute_url }}">{{ brew.name }}</a></li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <strong>There are no breweries present.</strong>
-            {% endif %}
-        </div>
+{% block body_block %}
+    <div class="row">
+        {% if beers %}
+            {% for beer in beers %}
+            <div class="col-xs-4 col-sm-3">
+            	<div class="thumbnail">
+            		<!--<div style="background-image:url('/static/images/dc_brau.png'); width:200px;height:200px; background-position:left;">&nbsp;</div> -->
+	        		<a href = "{{ beer.get_absolute_url }}"><img src='/static/images/'></a> 
+        		    <div class="caption">
+        		    	<h4>{{ beer.name }}</h4>
+        		    	<p>{{ beer.beer_style }} - {{ beer.get_top_score }}</p>
+
+        			</div>
+                </div>
+            </div>
+            {% endfor %}
+
+        {% elif breweries %}
+            {% for brew in breweries %}
+            <div class="col-xs-4 col-sm-3">
+                <div class="thumbnail">
+                    <!--<div style="background-image:url('/static/images/dc_brau.png'); width:200px;height:200px; background-position:left;">&nbsp;</div> -->
+                    <a href = "{{ brew.get_absolute_url }}"><img src='/static/images/'></a> 
+                    <div class="caption">
+                        <h4>{{ brew.name }}</h4>
+                        <p>{{ brew.country }} - {{ brew.brew_type }}</p>
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
     </div>
 {% endblock %}

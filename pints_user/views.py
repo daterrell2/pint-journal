@@ -31,9 +31,11 @@ def register(request):
 
 			registered = True
 
+			# authenticate and log in new user
 			new_user = authenticate(username=request.POST.get('username'), password=request.POST.get('password'))
 			try:
 				login(request, new_user)
+				# replace with redirect to welcome page
 				return redirect('pints_main.views.main_page')
 			
 			except:

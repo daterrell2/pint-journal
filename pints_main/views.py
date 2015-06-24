@@ -1,19 +1,28 @@
 from django.shortcuts import render, redirect
 from pints_main.models import Brewery, Beer, BeerScore
 from pints_main.forms import BeerForm, BreweryForm, BeerScoreForm
-# from django.contrib.auth.models import User
-# from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
 def main_page(request):
 	'''
-	Queries database for a list of all beers/ breweries
-	currently in DB. Retrieves 5 most recent of each and places
-	in context dict
+	Looks for query string in url '?view=beer' or '?view=brewery' and renders
+	main_page.html with appropriate object. Default view is 'beer'
 	'''
-	brewery_list = Brewery.objects.order_by('-date_added')[:5]
-	beer_list = Beer.objects.order_by('-date_added')[:5]
-	context_dict = {'breweries': brewery_list, 'beers': beer_list}
+
+	view = 'beer'
+	brewery_list = []
+	beer_list = []
+
+	#check for params in url
+	view_param = request.GET.get('view')
+	if view_param and view_param == 'brewery':
+		view = view_param
+		# only query for breweries if asked
+		brewery_list = Brewery.objects.order_by('-date_added')[:24]
+	else:
+		beer_list = Beer.objects.order_by('-date_added')[:24]
+
+	context_dict = {'breweries': brewery_list, 'beers': beer_list, 'view': view}
 	return render(request, 'pints_main/main_page.html', context_dict)
 
 def beer_detail(request, beer_name_slug):

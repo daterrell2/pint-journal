@@ -21,36 +21,58 @@
 
   <body>
 
-    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-      <div class="container-fluid">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="{% url 'main_page' %}">Pint Journal</a>
-        </div>
-        <div class="navbar-collapse collapse">
-          <ul class="nav navbar-nav navbar-right">
-            {% block navbar_items %}
-            {% if user.is_authenticated %}
-                <li><a href="{% url 'user_logout' %}"> Log Out </a></li>
-            {% else %}
-                <li><a href="{% url 'register' %}"> Register </a></li>
-                <li><a href="{% url 'user_login' %}?next={{ request.get_full_path }}">Sign In</a></li>
-            {% endif %}
-            {% endblock %}
-          </ul>
-        </div>
-      </div>
-    </div>
+    <div class="container">
+
+      <!-- Static navbar -->
+      <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="{% url 'main_page' %}">Pint Journal</a>
+          </div>
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+              <li class="active"><a href="{% url 'main_page' %}">Home</a></li>
+              <li><a href="/about/">About</a></li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Options<span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <!--customize dropdown items -->
+                  {% block dropdown_items %}
+                  <li><a href="{% url 'main_page' %}?view=beer">My Beers</a></li>
+                  <li><a href="{% url 'main_page' %}?view=brewery">My Breweries</a></li>
+                  <li role="separator" class="divider"></li>
+                  <li class="dropdown-header">Actions</li>
+                  <!--need to implement -->
+                  <li><a href="/">Add a Beer</a></li>
+                  <li><a href="/">Add a Brewery</a></li>
+                  {% endblock %}
+                </ul>
+              </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+              {% block navbar_right_items %}
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'user_logout' %}"> Log Out </a></li>
+                {% else %}
+                    <li><a href="{% url 'register' %}"> Register </a></li>
+                    <li><a href="{% url 'user_login' %}?next={{ request.get_full_path }}">Sign In</a></li>
+                {% endif %}
+              {% endblock %}
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div><!--/.container-fluid -->
+      </nav>
 
     <div class="container-fluid">
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
-                {% block side_block %}{% endblock %}
+                {% block side_items %}{% endblock %}
 
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
@@ -60,10 +82,11 @@
         </div>
       </div>
     </div>
+  </div><!--/container -->
+
 
     <!-- Bootstrap core JavaScript
     ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="http://getbootstrap.com/dist/js/bootstrap.min.js"></script>
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->

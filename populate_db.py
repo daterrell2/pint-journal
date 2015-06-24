@@ -4,10 +4,13 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pint_journal_project.settings')
 import django
 django.setup()
 
-from pints_main.models import Brewery, Beer, Beer_Score
+from pints_main.models import Brewery, Beer, BeerScore
+from django.contrib.auth.models import User
+
+user = User.objects.get(username=u'david')
 
 def populate():
-	Beer_Score.objects.all().delete()
+	BeerScore.objects.all().delete()
 	Beer.objects.all().delete()
 	Brewery.objects.all().delete()
 
@@ -68,9 +71,10 @@ def add_beer(brewery, name, beer_style):
 	br.save()
 	return br
 
-def add_score(beer, score):
-	s = Beer_Score()
+def add_score(beer, score, user=user):
+	s = BeerScore()
 	s.beer = beer
+	s.user = user
 	s.score = score
 	s.save()
 	return s

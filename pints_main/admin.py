@@ -8,7 +8,7 @@ class BeerAdmin(admin.ModelAdmin):
 	prepopulated_fields = {'slug':('brewery', 'name')} 
 
 class BeerScoreAdmin(admin.ModelAdmin):
-	list_display = ['beer', 'score', 'score_date']
+	list_display = ['beer', 'score', 'score_date', 'user']
 
 admin.site.register(Brewery, BreweryAdmin)
 admin.site.register(Beer, BeerAdmin)

@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect
 from pints_main.models import Brewery, Beer, BeerScore
 from pints_main.forms import BeerForm, BreweryForm, BeerScoreForm
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+import re
 
 def main_page(request):
 	'''
@@ -9,20 +11,33 @@ def main_page(request):
 	main_page.html with appropriate object. Default view is 'beer'
 	'''
 
-	view = 'beer'
-	brewery_list = []
-	beer_list = []
+	if request.user.is_authenticated:
+		user=User.objects.get(id=request.user.id)
 
-	#check for params in url
-	view_param = request.GET.get('view')
-	if view_param and view_param == 'brewery':
-		view = view_param
-		# only query for breweries if asked
-		brewery_list = Brewery.objects.order_by('-date_added')[:24]
+	scores = []
+	user = None
+	sort_choices = ['^-?score_date$', '^-?score$']
+	sort_pattern = '|'.join(sort_choices)
+	default_sort = '-score_date'
+
+	# get url params
+	sort_param = request.GET.get('sort')
+	view_param = request.GET.get('view)')
+
+	if sort_param and re.match(sort_pattern, sort_param):
+		sort = sort_param
 	else:
-		beer_list = Beer.objects.order_by('-date_added')[:24]
+		sort = default_sort
 
-	context_dict = {'breweries': brewery_list, 'beers': beer_list, 'view': view}
+	if user and view_param != 'all':
+		scores = BeerScore.objects.filter(user=user)
+		if scores:
+			scores = scores.order_by(sort)[:24]
+
+	else:
+		scores = BeerScore.objects.order_by(sort)[:24]
+
+	context_dict = {'scores': scores}
 	return render(request, 'pints_main/main_page.html', context_dict)
 
 def beer_detail(request, beer_name_slug):

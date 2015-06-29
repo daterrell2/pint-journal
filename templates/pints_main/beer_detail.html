@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block detail_title %}- {{ beer.name }} {% endblock %}
+
+{% block body_block %}
+    <div class="page-header">
+        <a href = "{% url 'edit_beer' beer.slug %}"> edit </a>
+       <h1>{{ beer.name }}</h1>
+        <p class="lead"><a href = "{{ brewery.get_absolute_url }}">{{ brewery.name }}</a> - {{ beer.beer_style }}</p>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Your Rating</th>
+                    <th>Date Rated</th>
+                    <th>Average Rating</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ beer_score.score }}</td>
+                    <td>{{ beer_score.score_date }}</td>
+                    <td>None</td>
+                </tr>
+            </tbody>
+        </table>
+
+
+    {% if user.is_authenticated %}
+    <div>
+
+        <h2> Rate this beer:</h2>
+
+        <div>
+            <form id = "beer_score_form" method = "post" action = "{{ beer.get_absolute_url }}/">
+                {% csrf_token %}
+                {% for hidden in form.hidden_fields %}
+                    {{ hidden }}
+                {% endfor %}
+
+                {% for field in form.visible_fields %}
+                    {{ field.help_text }}: {{ field }}  {{ field.errors }}
+                {% endfor %}
+                <br>
+                <input type="submit" name="submit" value="Submit Score">
+            </form>
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}

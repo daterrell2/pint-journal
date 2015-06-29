@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="http://getbootstrap.com/favicon.ico">
+
+    <title>Pint Journal{% block title %}{% endblock %}</title>
+
+    <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/dashboard.css" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="container">
+
+      <!-- Static navbar -->
+      <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+        <div class="container-fluid">
+          <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+              <span class="sr-only">Toggle navigation</span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+              <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="{% url 'main_page' %}">Pint Journal</a>
+          </div>
+          <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+              <li class="active"><a href="{% url 'main_page' %}">Home</a></li>
+              <li><a href="/about/">About</a></li>
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Options<span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <!--customize dropdown items -->
+                  {% block dropdown_items %}
+                  <li><a href="{% url 'main_page' %}?view=beer">My Beers</a></li>
+                  <li><a href="{% url 'main_page' %}?view=brewery">My Breweries</a></li>
+                  <li role="separator" class="divider"></li>
+                  <li class="dropdown-header">Actions</li>
+                  <!--need to implement -->
+                  <li><a href="/">Add a Beer</a></li>
+                  <li><a href="/">Add a Brewery</a></li>
+                  {% endblock %}
+                </ul>
+              </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+              {% block navbar_right_items %}
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'user_logout' %}"> Log Out </a></li>
+                {% else %}
+                    <li><a href="{% url 'register' %}"> Register </a></li>
+                    <li><a href="{% url 'user_login' %}?next={{ request.get_full_path }}">Sign In</a></li>
+                {% endif %}
+              {% endblock %}
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div><!--/.container-fluid -->
+      </nav>
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+                {% block side_items %}{% endblock %}
+
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+           <div>
+                {% block body_block %}{% endblock %}
+            </div>
+        </div>
+      </div>
+    </div>
+  </div><!--/container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="http://getbootstrap.com/dist/js/bootstrap.min.js"></script>
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="http://getbootstrap.com/assets/js/ie10-viewport-bug-workaround.js"></script>
+  </body>
+</html>

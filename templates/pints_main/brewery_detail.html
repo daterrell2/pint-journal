@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %} - {{ brewery.name }} {% endblock %}
+
+{% block body_block %}
+<div class="page=header">
+    <h1>{{ brewery.name }}</h1>
+    <p class="lead">
+        {% if brewery.country and brewery.brew_type %}
+            {{ brewery.country }}, {{ brewery.brew_type }}
+        {% elif brewery.country %}
+            {{ brewery.country }}
+        {% elif brewery.brew_type %}
+            {{ brewery.brew_type }}
+        {% endif %}
+    </p>
+    {% if brewery.url %}
+       <p class="lead">{{ brewery.url }}</p>
+    {% endif %}
+</div>
+
+{% if beers %}
+    <div class="row placeholders">
+        <div class="col-xs-6 col-sm-3 placeholder">
+                <strong> Beer </strong>
+        </div>
+        <div class="col-xs-6 col-sm-3 placeholder">
+                <strong> Rating </strong>
+        </div>
+    </div>
+    {% for beer in beers %}
+    <div class="row placeholders">
+        <div class="col-xs-6 col-sm-3 placeholder">
+                <a href = "{{ beer.get_absolute_url }}">{{ beer.name }} </a>
+        </div>
+
+        <div class="col-xs-6 col-sm-3 placeholder">
+                {% if beer.get_top_score %}
+                    {{ beer.get_top_score }}
+                {% else %}
+                    Not Rated
+                {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <strong>We don't have any beers for this brewery.</strong>
+{% endif %}
+    </div>
+<div>
+    <a href = "{% url 'add_beer' brewery.slug %}"> Add a new beer </a>
+</div>
+{% endblock %}

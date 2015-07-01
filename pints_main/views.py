@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect
+from django.http import HttpResponse
 from pints_main.models import BeerScore
 from pints_main.forms import BeerScoreForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from utils.brewerydb import BreweryDb
 import re
 
 def index(request):
@@ -42,55 +44,51 @@ def index(request):
 		beers = score.get_beer()
 		if beers:
 			name = beers.get('name')
-			style = beers['style']['category'].get('name')
+			style = beers['style']['category']['name']
 			brewery = beers.get('breweries')
-			icon = brewery[0]['images']['icon']
+			icon = brewery[0]['images']['medium']
 
 		else:
 			name, style, icon = None, None, None
 		
-		scores_detail.append({'name':name, 'style':style, 'score':score.score, 'id':score.id, 'icon':icon})
-		
+		scores_detail.append({'name':name, 'style':style, 'score':score.score, 'id':score.id, 'icon':icon, 'beer_id':score.beer})
+
 	context_dict = {'scores_detail': scores_detail}
 	return render(request, 'pints_main/index.html', context_dict)
 
-# def beer_detail(request, beer_score_id):
-# 	'''
-# 	Renders users score for a given beer, along with details from BreweryDB
-# 	'''
-# 	context_dict = {}
+def beer_detail(request, beer_id):
 
-# 	try:
-# 		beer_score = BeerScore.objects.get(id = beer_score_id)
-# 		context_dict['beer_score'] = beer_score
-# 		context_dict['beer'] = beer.brewery
-# 		beer_score = beer.get_top_score()
-# 		context_dict['beer_score'] = beer_score
+	if not request.user.is_authenticated:
+		return redirect('index')
 
-# 	except beer.DoesNotExist:
-# 		return redirect('/')
+	else:
+		user=User.objects.get(id=request.user.id)
+		fields = ['beer_score', 'beer_name', 'style', 'description', 'breweries', 'brewery_icon', 'brewery_id']
+		context_dict = {f:'' for f in fields}
 
-# 	if request.method=='POST':
-# 		form = BeerScoreForm(request.POST)
+		try:
+			beer_score = BeerScore.objects.get(beer = beer_id, user = user)
 
-# 		if form.is_valid():
-# 			if beer:
-# 				score = form.save(commit=False)
-# 				score.beer=beer
-# 				score.save()
+		except BeerScore.DoesNotExist:
+			return redirect('/beer/' + beer_id)
 
-# 				form = BeerScoreForm() #new blank form
+		context_dict['beer_score'] = beer_score
 
-# 				return redirect('/beer/'+beer.slug)
+		beer = BreweryDb.beer(beer_id, {'withBreweries':'Y'}).get('data')
+		
+		if beer:
+			context_dict['beer_name'] = beer.get('name')
+			context_dict['style'] = beer['style']['category']['name']
+			context_dict['description'] = beer['description']
+			
+			breweries = beer.get('breweries') 
+			if breweries:
+				context_dict['breweries'] = breweries
+				brewery = breweries[0] #pick first brewery listed
+				context_dict['icon'] = brewery['images']['medium']
+				context_dict['brewery_id'] = brewery['id']
 
-# 		else:
-# 			print form.errors
-
-# 	else:
-# 		form = BeerScoreForm()
-
-# 	context_dict['form'] = form
-# 	return render(request, 'pints_main/beer_detail.html', context_dict)
+		return render(request, 'pints_main/beer_detail.html', context_dict)
 
 # def brewery_detail(request, brewery_name_slug):
 # 	context_dict = {}

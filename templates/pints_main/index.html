@@ -10,15 +10,17 @@
         {% if scores_detail %}
             {% for score in scores_detail %}
             <div class="col-xs-6 col-sm-4">
-            	<div class="thumbnail">
-            		<!-- <div style="background-image:url('{{ score.icon }}'); width:200px;height:200px; background-position:left;">&nbsp;</div> -->
-	        		<a href = "/beer/score/{{ score.id }}"><img src={{ score.icon }}></a>
-        		    <div class="caption">
-        		    	<h4>{{ score.name }}</h4> {{ score.style }}
-        		    	<p>{{ score.score }}</p>
 
-        			</div>
-                </div>
+                    <div class="thumbnail">
+                        <a href = "/beer/my_beer/{{ score.beer_id }}">
+                		<!-- <div style="background-image:url('{{ score.icon }}'); width:200px;height:200px; background-position:left;">&nbsp;</div> -->
+    	        		<img src={{ score.icon }} class="img-thumbnail">
+            		    <div class="caption">
+            		    	<h4>{{ score.name }} - {{score.score }}</h4>
+                        </div>
+                    </a>
+                    </div>
+                </a>
             </div>
             {% endfor %}
 

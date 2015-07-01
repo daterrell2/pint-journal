@@ -4,5 +4,6 @@ Pillow==2.8.2
 Unidecode==0.04.18
 pycairo==1.8.10
 requests==2.7.0
+requests-cache==0.4.10
 virtualenv==12.0.7
 virtualenvwrapper-win==1.2.0

@@ -16,6 +16,11 @@
         </div>
     </div>
 
+    {% if beer_desc %}
+        <p> {{ beer_desc }} </p>
+    {% endif %}
+
+    {% if beer_score %}
         <div class="table-responsive">
             <table class="table table-striped">
                 <thead>
@@ -29,10 +34,15 @@
                     <tr>
                         <td>{{ beer_score.score }}</td>
                         <td>{{ beer_score.score_date }}</td>
-                        <td>None</td>
+                        <td>{{ avg_score }}</td>
                     </tr>
                 </tbody>
             </table>
         </div>
+    {% elif user %}
+        <a href = "/beer/add_beer_score/">Rate this beer!</a>
+    {% else %}
+        <a href = "{% url pints_user.user_login %}"> Log in to rate this beer </a>
+    {% endif %} 
 
 {% endblock %}

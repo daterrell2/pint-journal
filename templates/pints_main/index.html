@@ -12,13 +12,16 @@
             <div class="col-xs-6 col-sm-4">
 
                     <div class="thumbnail">
-                        <a href = "/beer/my_beer/{{ score.beer_id }}">
+                        <a href = "/beer/{{ score.beer_id }}">
                 		<!-- <div style="background-image:url('{{ score.icon }}'); width:200px;height:200px; background-position:left;">&nbsp;</div> -->
     	        		<img src={{ score.icon }} class="img-thumbnail">
             		    <div class="caption">
-            		    	<h4>{{ score.name }} - {{score.score }}</h4>
+            		    	<h5>{{ score.name }}</h5>
+                        </a>
+                        <h5>{{score.score }}/ 100</h5>
                         </div>
-                    </a>
+                    
+                    
                     </div>
                 </a>
             </div>

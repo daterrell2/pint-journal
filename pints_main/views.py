@@ -5,6 +5,7 @@ from pints_main.forms import BeerScoreForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from utils.brewerydb import BreweryDb
+from django.db.models import Avg
 import re
 
 def index(request):
@@ -58,37 +59,47 @@ def index(request):
 
 def beer_detail(request, beer_id):
 
-	if not request.user.is_authenticated:
+	beer = BreweryDb.beer(beer_id, {'withBreweries':'Y'}).get('data')
+
+	if not beer:
 		return redirect('index')
 
+	fields = ['user', 'beer_name', 'beer_style', 'beer_desc', 'breweries', 'brewery_img', 'brewery_id']
+	context_dict = {f:'' for f in fields}
+
+	# Beer details
+	context_dict['beer_name'] = beer['name']
+	context_dict['beer_style'] = beer['style']['category']['name']
+	context_dict['beer_desc'] = beer['description']
+	
+	breweries = beer.get('breweries')
+	if breweries:
+		context_dict['breweries'] = breweries
+		brewery = breweries[0] #pick first brewery listed
+		context_dict['brewery_img'] = brewery['images']['medium']
+		context_dict['brewery_id'] = brewery['id']
+
+	# Average score
+	all_scores = BeerScore.objects.filter(beer=beer_id)
+	if all_scores:
+		 avg_score = all_scores.aggregate(Avg('score'))['score__avg']
+		 context_dict['avg_score'] = int(round(avg_score))
 	else:
+		context_dict['avg_score'] = 'N/A'
+
+	# User score
+	if request.user.is_authenticated:
 		user=User.objects.get(id=request.user.id)
-		fields = ['beer_score', 'beer_name', 'style', 'description', 'breweries', 'brewery_icon', 'brewery_id']
-		context_dict = {f:'' for f in fields}
+		context_dict['user'] = user
 
 		try:
 			beer_score = BeerScore.objects.get(beer = beer_id, user = user)
+			context_dict['beer_score'] = beer_score
 
 		except BeerScore.DoesNotExist:
-			return redirect('/beer/' + beer_id)
+			context_dict['beer_score'] = None
 
-		context_dict['beer_score'] = beer_score
-
-		beer = BreweryDb.beer(beer_id, {'withBreweries':'Y'}).get('data')
-		
-		if beer:
-			context_dict['beer_name'] = beer.get('name')
-			context_dict['style'] = beer['style']['category']['name']
-			context_dict['description'] = beer['description']
-			
-			breweries = beer.get('breweries') 
-			if breweries:
-				context_dict['breweries'] = breweries
-				brewery = breweries[0] #pick first brewery listed
-				context_dict['icon'] = brewery['images']['medium']
-				context_dict['brewery_id'] = brewery['id']
-
-		return render(request, 'pints_main/beer_detail.html', context_dict)
+	return render(request, 'pints_main/beer_detail.html', context_dict)
 
 # def brewery_detail(request, brewery_name_slug):
 # 	context_dict = {}

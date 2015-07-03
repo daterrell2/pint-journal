@@ -19,6 +19,8 @@ single_param_endpoints = ["beer", "brewery", "category", "event",
                           "feature", "glass", "guild", "ingredient",
                           "location", "socialsite", "style", "menu"]
 
+join_endpoints = ["beer/breweries", "brewery/beers"]
+
 class BreweryDb:
 
     @staticmethod
@@ -34,6 +36,15 @@ class BreweryDb:
         def _function(id, options={}):
             return BreweryDb._get("/" + name + "/" + id, options)
         return _function
+
+    @staticmethod
+    def __make_join_endpoint_fun(name):
+        name1, name2 = name.split("/")
+        @staticmethod
+        def _function(id, options={}):
+            return BreweryDb._get("/" + "/".join([name1, id, name2]), options)
+        return _function
+
 
     @staticmethod
     def _get(request, options):
@@ -54,6 +65,9 @@ class BreweryDb:
             setattr(BreweryDb, endpoint.replace('/', '_'), fun)
         for endpoint in single_param_endpoints:
             fun = BreweryDb.__make_singlearg_endpoint_fun(endpoint)
+            setattr(BreweryDb, endpoint.replace('/', '_'), fun)
+        for endpoint in join_endpoints:
+            fun = BreweryDb.__make_join_endpoint_fun(endpoint)
             setattr(BreweryDb, endpoint.replace('/', '_'), fun)
         print "Installing requests_cache"
         requests_cache.install_cache(cache_name= cache_name, backend=cache_backend, expire_after=cache_expire_after)

@@ -2,41 +2,46 @@
 
 {% load staticfiles %}
 
-{% block title %} - {{ brewery_name }} {% endblock %}
+{% block title %} - {{ brewery.data.name }} {% endblock %}
 
 {% block body_block %}
 <div class="page=header">
-    <h1>{{ brewery_name }}</h1>
+    <h1>{{ brewery.data.name }}</h1>
 
-    {% if brewery_url %}
-       <p class="lead">{{ brewery_url }}</p>
+    {% if brewery.data.website %}
+       <p class="lead">{{ brewery.data.website }}</p>
     {% endif %}
 </div>
 
 {% if beers %}
-    <div class="row placeholders">
-        <div class="col-xs-6 col-sm-3 placeholder">
-                <strong> Beer </strong>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Beer</th>
+                        <th>Style</th>
+                        <th>My Rating</th>
+                        <th>Average Rating </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for beer in beers.data %}
+                    <tr>
+                        <td><a href = "/beer/{{ beer.id_ }}">{{ beer.name }} </a></td>
+                        <td>{{ beer.style.category.name }}</td>
+                        <td>
+                            {% if beer.user_score %}
+                                {{ beer.user_score }}
+                            {% else %}
+                                Not Rated
+                            {% endif %}
+                        </td>
+                        <td>{{ beer.avg_score }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-        <div class="col-xs-6 col-sm-3 placeholder">
-                <strong> Rating </strong>
-        </div>
-    </div>
-    {% for beer in beers %}
-    <div class="row placeholders">
-        <div class="col-xs-6 col-sm-3 placeholder">
-                <a href = "/beer/{{ beer.id }}">{{ beer.name }} </a>
-        </div>
-
-        <div class="col-xs-6 col-sm-3 placeholder">
-                {% if beer.user_score %}
-                    {{ beer.user_score }}
-                {% else %}
-                    Not Rated
-                {% endif %}
-        </div>
-    </div>
-    {% endfor %}
 {% else %}
     <strong>We don't have any beers for this brewery.</strong>
 {% endif %}

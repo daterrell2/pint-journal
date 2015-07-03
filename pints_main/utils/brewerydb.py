@@ -1,5 +1,7 @@
 import requests
 import requests_cache
+import __builtin__
+import keyword
 import time
 
 DEFAULT_BASE_URI = "http://api.brewerydb.com/v2"
@@ -76,17 +78,31 @@ class BreweryDb:
         print "Installing requests_cache"
         requests_cache.install_cache(cache_name= cache_name, backend=cache_backend, expire_after=cache_expire_after)
 
-# my addition
-class ReturnObject:
+# my addition--potentially bad idea!!!
+class BreweryDbObject(object):
     '''
-    Unpacks dictionary (json) data into an object.
-    Each key in dictionary becomes object attribute.
-    If value is also a dictionary, it is recursively unpacked value into a ReturnObject
+    Unpacks API reutrned object (nested dict) into an object, with 
+    dict keys as attributes. Also recursively unpacks nested dicts 
+    as BreweryDbObjects
+
+    Renames any attr that is  python keywords/ builtins to attr_
     ''' 
     def __init__(self, data = {}):
-        for k in data.keys():
-            if isinstance(data[k], dict):
-                setattr(self, k, ReturnObject(data[k]))
+
+        for k, v in data.items():
+            if k in dir(__builtin__) + keyword.kwlist:
+                data[k+'_'] = v
+                del data[k]
+
+        for k, v in data.items():
+
+            if isinstance(v, dict):
+                setattr(self, k, BreweryDbObject(v))
+
+            elif isinstance(v, (list, tuple)):
+                setattr(self, k, [BreweryDbObject(i) if isinstance(i, dict) else i for i in v])
+
             else:
-                setattr(self, k, data[k])
+                setattr(self, k, v)
+
 

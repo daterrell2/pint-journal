@@ -2,22 +2,22 @@
 
 {% load staticfiles %}
 
-{% block detail_title %}- {{ beer_name }} {% endblock %}
+{% block detail_title %}- {{ beer.data.name }} {% endblock %}
 
 {% block body_block %}
     <div class="page-header">
         <div class="row">
             <div class="col-md-6">
-               <h1>{{ beer_name }}</h1>
-               {% for b in breweries %}
-                    <p class="lead"><a href = "/brewery/{{ b.id }}">{{ b.name }}</a> </p>
+               <h1>{{ beer.data.name }}</h1>
+               {% for b in beer.data.breweries %}
+                    <p class="lead"><a href = "/brewery/{{ b.id_ }}">{{ b.name }}</a> </p>
                 {% endfor %}
             </div>
         </div>
     </div>
 
-    {% if beer_desc %}
-        <p> {{ beer_desc }} </p>
+    {% if beer.data.description %}
+        <p> {{ beer.data.description }} </p>
     {% endif %}
 
     {% if beer_score %}

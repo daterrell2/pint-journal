@@ -7,18 +7,17 @@
 
 {% block body_block %}
     <div class="row">
-        {% if scores_detail %}
-            {% for score in scores_detail %}
+        {% if beer_list %}
+            {% for beer in beer_list %}
             <div class="col-xs-6 col-sm-4">
 
                     <div class="thumbnail">
-                        <a href = "/beer/{{ score.beer_id }}">
-                		<!-- <div style="background-image:url('{{ score.icon }}'); width:200px;height:200px; background-position:left;">&nbsp;</div> -->
-    	        		<img src={{ score.icon }} class="img-thumbnail">
+                        <a href = "/beer/{{ beer.data.id_ }}">
+    	        		<img src={{ beer.data.breweries.0.images.medium }} class="img-thumbnail">
             		    <div class="caption">
-            		    	<h5>{{ score.name }}</h5>
+            		    	<h5>{{ beer.data.name }}</h5>
                         </a>
-                        <h5>{{score.score }}/ 100</h5>
+                        <h5>{{beer.data.score }}/ 100</h5>
                         </div>
                     
                     

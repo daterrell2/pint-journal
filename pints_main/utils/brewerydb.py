@@ -6,7 +6,7 @@ DEFAULT_BASE_URI = "http://api.brewerydb.com/v2"
 BASE_URI = ""
 API_KEY = ""
 
-CACHE_EXPIRE_AFTER = 60 * 60 * 24 # one day
+CACHE_EXPIRE_AFTER = 60 * 60 * 24 # cache exipres daily
 CACHE_NAME = 'brewerydb_cache'
 CACHE_BACKEND = 'sqlite'
 
@@ -19,7 +19,8 @@ single_param_endpoints = ["beer", "brewery", "category", "event",
                           "feature", "glass", "guild", "ingredient",
                           "location", "socialsite", "style", "menu"]
 
-join_endpoints = ["beer/breweries", "brewery/beers"]
+# my addition
+join_endpoints = ["beer/breweries", "brewery/beers", "brewery/locations"]
 
 class BreweryDb:
 
@@ -37,6 +38,8 @@ class BreweryDb:
             return BreweryDb._get("/" + name + "/" + id, options)
         return _function
 
+    
+    # my addition
     @staticmethod
     def __make_join_endpoint_fun(name):
         name1, name2 = name.split("/")
@@ -50,7 +53,6 @@ class BreweryDb:
     def _get(request, options):
         options.update({"key" : BreweryDb.API_KEY})
         now = time.ctime(int(time.time()))
-        #r = requests.get(BreweryDb.BASE_URI + request, params=options).json()
         r = requests.get(BreweryDb.BASE_URI + request, params=options)
         print "Time: {0} / Used Cache: {1}".format(now, r.from_cache)
         return r.json()
@@ -66,8 +68,25 @@ class BreweryDb:
         for endpoint in single_param_endpoints:
             fun = BreweryDb.__make_singlearg_endpoint_fun(endpoint)
             setattr(BreweryDb, endpoint.replace('/', '_'), fun)
+        
+        # my addition
         for endpoint in join_endpoints:
             fun = BreweryDb.__make_join_endpoint_fun(endpoint)
             setattr(BreweryDb, endpoint.replace('/', '_'), fun)
         print "Installing requests_cache"
         requests_cache.install_cache(cache_name= cache_name, backend=cache_backend, expire_after=cache_expire_after)
+
+# my addition
+class ReturnObject:
+    '''
+    Unpacks dictionary (json) data into an object.
+    Each key in dictionary becomes object attribute.
+    If value is also a dictionary, it is recursively unpacked value into a ReturnObject
+    ''' 
+    def __init__(self, data = {}):
+        for k in data.keys():
+            if isinstance(data[k], dict):
+                setattr(self, k, ReturnObject(data[k]))
+            else:
+                setattr(self, k, data[k])
+

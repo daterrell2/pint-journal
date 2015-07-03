@@ -42,7 +42,7 @@
     {% elif user %}
         <a href = "/beer/add_beer_score/">Rate this beer!</a>
     {% else %}
-        <a href = "{% url pints_user.user_login %}"> Log in to rate this beer </a>
+        <a href = "{% url 'pints_user.user_login' %}"> Log in to rate this beer </a>
     {% endif %} 
 
 {% endblock %}

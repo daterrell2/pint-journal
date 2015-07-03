@@ -8,17 +8,23 @@ from utils.brewerydb import BreweryDb
 from django.db.models import Avg
 import re
 
+@login_required
 def index(request):
 	'''
 	Looks for query string in url '?view=beer' or '?view=brewery' and renders
 	index.html with appropriate object. Default view is 'beer'
 	'''
 
-	if request.user.is_authenticated:
-		user=User.objects.get(id=request.user.id)
+	if not request.user.is_authenticated:
+		user = None
+
+	else:
+		try:
+			user=User.objects.get(id=request.user.id)
+		except User.DoesNotExist:
+			user = None
 
 	scores = []
-	user = None
 	sort_choices = ['^-?score_date$', '^-?score$']
 	sort_pattern = '|'.join(sort_choices)
 	default_sort = '-score_date'
@@ -57,15 +63,24 @@ def index(request):
 	context_dict = {'scores_detail': scores_detail}
 	return render(request, 'pints_main/index.html', context_dict)
 
+@login_required
 def beer_detail(request, beer_id):
+
+	fields = ['user', 'beer_score', 'beer_name', 'beer_style', 'beer_desc', 'breweries', 'brewery_img', 'brewery_id']
+	context_dict = {f:'' for f in fields}
+
+	# User score
+	user=User.objects.get(id=request.user.id)
+	context_dict['user'] = user
+
+	beer_score = BeerScore.objects.filter(beer = beer_id, user = user)
+	if beer_score:
+		context_dict['beer_score'] = beer_score[0]
 
 	beer = BreweryDb.beer(beer_id, {'withBreweries':'Y'}).get('data')
 
 	if not beer:
 		return redirect('index')
-
-	fields = ['user', 'beer_name', 'beer_style', 'beer_desc', 'breweries', 'brewery_img', 'brewery_id']
-	context_dict = {f:'' for f in fields}
 
 	# Beer details
 	context_dict['beer_name'] = beer['name']
@@ -87,33 +102,46 @@ def beer_detail(request, beer_id):
 	else:
 		context_dict['avg_score'] = 'N/A'
 
-	# User score
-	if request.user.is_authenticated:
-		user=User.objects.get(id=request.user.id)
-		context_dict['user'] = user
-
-		try:
-			beer_score = BeerScore.objects.get(beer = beer_id, user = user)
-			context_dict['beer_score'] = beer_score
-
-		except BeerScore.DoesNotExist:
-			context_dict['beer_score'] = None
-
 	return render(request, 'pints_main/beer_detail.html', context_dict)
 
-# def brewery_detail(request, brewery_name_slug):
-# 	context_dict = {}
+@login_required
+def brewery_detail(request, brewery_id):
 
-# 	try:
-# 		brewery = Brewery.objects.get(slug = brewery_name_slug)
-# 		context_dict['brewery'] = brewery
-# 		beers = brewery.get_beers()
-# 		context_dict['beers'] = beers
+	fields = ['user', 'brewery_name', 'brewery_desc', 'brewery_url', 'brewery_img', 'beers']
+	context_dict = {f:'' for f in fields}
 
-# 	except Brewery.DoesNotExist:
-# 		return redirect('/')
+	user=User.objects.get(id=request.user.id)
+	context_dict['user'] = user
 
-# 	return render(request, 'pints_main/brewery_detail.html', context_dict)
+	brewery = BreweryDb.brewery(brewery_id).get('data')
+
+	if not brewery:
+		return redirect('index')
+
+	context_dict['brewery_name'] = brewery['name']
+	context_dict['brewery_desc'] = brewery['description']
+	context_dict['brewery_url'] = brewery['website']
+	context_dict['brewery_img'] = brewery['images']['large']
+
+	beers = BreweryDb.brewery_beers(brewery_id).get('data')
+
+	for b in beers:
+		beer_id = b['id']
+		all_scores = BeerScore.objects.filter(beer=beer_id)
+		if all_scores:
+		 	avg_score = all_scores.aggregate(Avg('score'))['score__avg']
+		 	b['avg_score'] = int(round(avg_score))
+		else:
+			b['avg_score'] = 'N/A'
+
+		user_score = BeerScore.objects.filter(beer=beer_id, user=user)
+
+		if user_score:
+			b['user_score']  = user_score[0].score
+
+	context_dict['beers'] = beers
+
+	return render(request, 'pints_main/brewery_detail.html', context_dict)
 
 # @login_required
 # def add_brewery(request):

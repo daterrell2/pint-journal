@@ -14,10 +14,10 @@
                     <div class="thumbnail">
                         <a href = "/beer/{{ beer.data.id_ }}">
     	        		<img src={{ beer.data.breweries.0.images.medium }} class="img-thumbnail">
-            		    <div class="caption">
+            		    <div class="caption text-center">
             		    	<h5>{{ beer.data.name }}</h5>
                         </a>
-                        <h5>{{beer.data.score }}/ 100</h5>
+                        <h5>{{beer.data.score }}<small>/ 100</small></h5>
                         </div>
                     
                     

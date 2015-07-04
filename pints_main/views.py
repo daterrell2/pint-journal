@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from pints_main.models import BeerScore
+from pints_main.models import BeerScore, BeerScoreArchive
 from pints_main.forms import BeerScoreForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -58,8 +57,67 @@ def index(request):
 
 @login_required
 def beer_detail(request, beer_id):
+	'''
+	Renders page for a single beer.
+
+	If user has rated this beer, displays score and average score for all users.
+
+	If user has not rated, displays form for new score that submits back to this view.
+
+	Takes GET paramerter 'edit'. If '?edit=TRUE' (and user has already rated this beer)
+		renders form with user's current score filled in as value.
+
+		Submitting this form updates score in DB and adds old score to BeerScoreArchive.
+	'''
 
 	context_dict = {}
+
+	user=User.objects.get(id=request.user.id)
+
+	context_dict['user'] = user
+	context_dict['form_placeholder'] = 'score'
+	context_dict['edit'] = False
+
+	if request.method == 'POST':
+		
+		edit_flag=False
+
+		try:
+			new_score = BeerScore.objects.get(beer=beer_id, user=user)
+			old_score_val = new_score.score
+			edit_flag=True
+
+	
+		except BeerScore.DoesNotExist:
+			new_score = BeerScore(beer=beer_id, user=user)
+		
+		form = BeerScoreForm(request.POST)
+
+		if form.is_valid():
+			form_score = form.save(commit=False)
+			new_score.score = form_score.score
+
+			if not edit_flag:
+				new_score.user = user
+				new_score.beer = beer_id
+				new_score.save()
+			else:
+				new_score.save()
+				if new_score.score != old_score_val:
+					old_score = BeerScoreArchive(beer=beer_id, user=user, score=old_score_val)
+					old_score.save()
+
+			return redirect('/beer/' + beer_id)
+
+		else:
+			context_dict['form_placeholder'] = request.POST.get('score')
+			print "INVALID!!!"
+			print form.errors
+
+	else:
+		form = BeerScoreForm()
+
+	context_dict['form'] = form
 
 	# Beer Details
 	beer = BreweryDb.beer(beer_id, {'withBreweries':'Y'})
@@ -70,14 +128,12 @@ def beer_detail(request, beer_id):
 	context_dict['beer'] = BreweryDbObject(beer)
 
 	# User score
-	user=User.objects.get(id=request.user.id)
-	context_dict['user'] = user
-
 	beer_score = BeerScore.objects.filter(beer = beer_id, user = user)
 	if beer_score:
 		context_dict['beer_score'] = beer_score[0]
-
-
+		context_dict['form_placeholder'] = beer_score[0].score
+		if request.GET.get('edit') == 'True':
+			context_dict['edit'] = True
 
 	# Average score
 	all_scores = BeerScore.objects.filter(beer=beer_id)
@@ -85,7 +141,7 @@ def beer_detail(request, beer_id):
 		 avg_score = all_scores.aggregate(Avg('score'))['score__avg']
 		 context_dict['avg_score'] = int(round(avg_score))
 	else:
-		context_dict['avg_score'] = 'N/A'
+		context_dict['avg_score'] = None
 
 	return render(request, 'pints_main/beer_detail.html', context_dict)
 
@@ -118,12 +174,12 @@ def brewery_detail(request, brewery_id):
 			 	avg_score = all_scores.aggregate(Avg('score'))['score__avg']
 			 	b['avg_score'] = int(round(avg_score))
 			else:
-				b['avg_score'] = 'N/A'
+				b['avg_score'] = None
 
 			user_score = BeerScore.objects.filter(beer=beer_id, user=user)
 
 			if user_score:
-				b['user_score']  = user_score[0].scores
+				b['user_score']  = user_score[0].score
 			else:
 				b['user_score'] = None
 

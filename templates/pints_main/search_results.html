@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %} Results {% endblock %}
+
+
+{% block body_block %}
+        {% if results %}
+
+        <ul>
+            {% for i in results.data %}
+
+            <li><a href="/{{ type }}/{{ i.id_ }}">{{ i.name }}</a></li>
+
+            {% endfor %}
+
+        </ul>
+
+        {% if pages %}
+
+        <nav>
+		  <ul class="pagination">
+		  		{% if p > 1 %}
+		  		<li>
+			      <a href="/search/?q={{ q }}&type={{ type }}&p={{ p|add:"-1" }}" aria-label="Previous">
+			        <span aria-hidden="true">&laquo;</span>
+			      </a>
+			    </li>
+			    {% endif %}
+		  	{% for pg in pages %}
+			    <li><a href="/search/?q={{ q }}&type={{ type }}&p={{ pg }}">{{ pg }}</a></li>
+			{% endfor %}
+				<li>
+			      <a href="/search/?q={{ q }}&type={{ type }}&p={{ p|add:"1" }}" aria-label="Next">
+			        <span aria-hidden="true">&raquo;</span>
+			      </a>
+			    </li>
+			  </ul>
+
+		</nav>
+		{% endif %}
+
+        {% else %}
+
+        <p class="lead">No results found </p>
+
+        {% endif %}
+
+{% endblock %}

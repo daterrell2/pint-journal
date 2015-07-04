@@ -192,42 +192,49 @@ def brewery_detail(request, brewery_id):
 
 
 def search(request):
+	context_dict = {}
 
 	search_types=['beer', 'brewery']
 	search_params=['q', 'type', 'p']
 
-	pages = None
-	page_display = 10
+	pages = []
+	num_pages = 10
 
 	search_dict = {k: request.GET.get(k) for k in search_params}
 
 	if search_dict['type'] not in search_types:
 		search_dict['type'] = search_types[0]
-
 	try:
 		search_dict['p'] = int(search_dict['p'])
 	except TypeError:
 		search_dict['p'] = 1
 
+	context_dict = search_dict
+
+	if search_dict['type'] == 'beer':
+		search_dict['withBreweries'] = 'Y'
+
 	search_request = BreweryDb.search(search_dict)
 
 	if search_request and search_request.get('status') == 'success':
+		# current page
+		p = context_dict['p']
+
 		results = BreweryDbObject(search_request)
-		search_dict['results'] = results
+		context_dict['results'] = results
 
 		last_page = int(results.numberOfPages)
 		if last_page > 1:
-			current_page = int(search_dict['p'])
 
-			if last_page - current_page < page_display:
-				pages = range(current_page + 1, last_page + 1)
+			if p >= num_pages:
+				pages = range(p, min(last_page, p + num_pages) +1)
 
 			else:
-				pages = range(current_page + 1, current_page + page_display + 1)
+				pages = range(1, num_pages+1)
 
-	search_dict['pages'] = pages
+	context_dict['pages'] = pages
 
-	return render(request, 'pints_main/search_results.html', search_dict)
+	return render(request, 'pints_main/search_results.html', context_dict)
 
 
 

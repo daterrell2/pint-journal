@@ -190,6 +190,52 @@ def brewery_detail(request, brewery_id):
 
 	return render(request, 'pints_main/brewery_detail.html', context_dict)
 
+
+def search(request):
+
+	search_types=['beer', 'brewery']
+	search_params=['q', 'type', 'p']
+
+	pages = None
+	page_display = 10
+
+	search_dict = {k: request.GET.get(k) for k in search_params}
+
+	if search_dict['type'] not in search_types:
+		search_dict['type'] = search_types[0]
+
+	try:
+		search_dict['p'] = int(search_dict['p'])
+	except TypeError:
+		search_dict['p'] = 1
+
+	search_request = BreweryDb.search(search_dict)
+
+	if search_request and search_request.get('status') == 'success':
+		results = BreweryDbObject(search_request)
+		search_dict['results'] = results
+
+		last_page = int(results.numberOfPages)
+		if last_page > 1:
+			current_page = int(search_dict['p'])
+
+			if last_page - current_page < page_display:
+				pages = range(current_page + 1, last_page + 1)
+
+			else:
+				pages = range(current_page + 1, current_page + page_display + 1)
+
+	search_dict['pages'] = pages
+
+	return render(request, 'pints_main/search_results.html', search_dict)
+
+
+
+
+
+
+
+
 # @login_required
 # def add_brewery(request):
 # 	if request.method=='POST':

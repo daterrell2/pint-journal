@@ -46,15 +46,33 @@
                   {% block dropdown_items %}
                   <li><a href="{% url 'index' %}?view=beer">My Beers</a></li>
                   <li><a href="{% url 'index' %}?view=brewery">My Breweries</a></li>
-                  <li role="separator" class="divider"></li>
-                  <li class="dropdown-header">Actions</li>
-                  <!--need to implement -->
-                  <li><a href="/">Add a Beer</a></li>
-                  <li><a href="/">Add a Brewery</a></li>
                   {% endblock %}
                 </ul>
               </li>
             </ul>
+
+
+            <!-- Search Form -->
+            <form class="navbar-form navbar-left" role="search" action="/search/">
+              <div class="form-group">
+                <input type="text" class="form-control" placeholder="Search" name="q">
+              </div>
+              <div class="radio">
+                  <label class="navbar-text">
+                    <input type="radio" name="type" id="type1" value="beer" checked>
+                    Beer
+                  </label>
+                </div>
+              <div class="radio">
+                  <label class="navbar-text">
+                    <input type="radio" name="type" id="type2" value="brewery">
+                    Brewery
+                  </label>
+              </div>
+              <button type="submit" class="btn btn-default">Search</button>
+          </form>
+          <!--End Search Form -->
+
             <ul class="nav navbar-nav navbar-right">
               {% block navbar_right_items %}
                 {% if user.is_authenticated %}

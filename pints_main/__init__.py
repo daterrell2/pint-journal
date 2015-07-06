@@ -1,0 +1,1 @@
+default_app_config = 'pints_main.apps.PintsMainConfig'

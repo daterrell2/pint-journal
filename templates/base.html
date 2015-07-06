@@ -33,28 +33,54 @@
               <span class="icon-bar"></span>
               <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="{% url 'main_page' %}">Pint Journal</a>
+            <a class="navbar-brand" href="{% url 'index' %}">Pint Journal</a>
           </div>
           <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-              <li class="active"><a href="{% url 'main_page' %}">Home</a></li>
+              <li class="active"><a href="{% url 'index' %}">Home</a></li>
               <li><a href="/about/">About</a></li>
               <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Options<span class="caret"></span></a>
                 <ul class="dropdown-menu">
                   <!--customize dropdown items -->
                   {% block dropdown_items %}
-                  <li><a href="{% url 'main_page' %}?view=beer">My Beers</a></li>
-                  <li><a href="{% url 'main_page' %}?view=brewery">My Breweries</a></li>
-                  <li role="separator" class="divider"></li>
-                  <li class="dropdown-header">Actions</li>
-                  <!--need to implement -->
-                  <li><a href="/">Add a Beer</a></li>
-                  <li><a href="/">Add a Brewery</a></li>
+                  <li><a href="{% url 'index' %}?view=beer">My Beers</a></li>
+                  <li><a href="{% url 'index' %}?view=brewery">My Breweries</a></li>
                   {% endblock %}
                 </ul>
               </li>
             </ul>
+
+
+            <!-- Search Form -->
+            <form class="navbar-form navbar-left" role="search" action="/search/">
+              <div class="form-group">
+                <input type="text" class="form-control" placeholder="Search" name="q">
+                <div class="radio-inline">
+                    <label style="color:gray">
+                      {% if not request.GET.type == 'brewery' %}
+                      <input type="radio" name="type" id="type1" value="beer" checked>
+                      {% else %}
+                      <input type="radio" name="type" id="type1" value="beer">
+                      {% endif %}
+                      Beer
+                    </label>
+                  </div>
+                <div class="radio-inline">
+                    <label style="color:gray">
+                      {% if not request.GET.type == 'brewery' %}
+                      <input type="radio" name="type" id="type2" value="brwery">
+                      {% else %}
+                      <input type="radio" name="type" id="type2" value="brewery" checked>
+                      {% endif %}
+                      Brewery
+                    </label>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-default btn-sm">Search</button>
+          </form>
+          <!--End Search Form -->
+
             <ul class="nav navbar-nav navbar-right">
               {% block navbar_right_items %}
                 {% if user.is_authenticated %}
@@ -71,11 +97,7 @@
 
     <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-3 col-md-2 sidebar">
-                {% block side_items %}{% endblock %}
-
-        </div>
-        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+        <div class="col-md-9 main">
            <div>
                 {% block body_block %}{% endblock %}
             </div>

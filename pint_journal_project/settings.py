@@ -29,9 +29,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 SECRET_KEY = '$4ksckygt+6@615#bh(%_cqjm(1_d4g*ze5^)l)mvg@+^x10l('
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['daterrell.pythonanywhere.com']
 
 
 # Application definition
@@ -85,9 +85,10 @@ WSGI_APPLICATION = 'pint_journal_project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': dev_settings.DB_NAME,
-        'USER': dev_settings.DB_USER,
-        'PASSWORD': dev_settings.DB_PASSWORD
+        'NAME': 'daterrell$pint_journal_db',
+        'USER': 'daterrell',
+        'PASSWORD': 'pintsdev',
+        'HOST': 'mysql.server'
     }
 }
 

@@ -1,12 +1,10 @@
 from django.shortcuts import render, redirect
-from pints_user.models import UserProfile
-from django.contrib.auth.models import User
 from pints_user.forms import UserForm, UserProfileForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
 def login_error(request, error_message):
-	return render(reqeust, 'pints_user/login_error.html', {'error_message': error_message})
+	return render(request, 'pints_user/login_error.html', {'error_message': error_message})
 
 def register(request):
 
@@ -36,8 +34,8 @@ def register(request):
 			try:
 				login(request, new_user)
 				# replace with redirect to welcome page
-				return redirect('pints_main.views.main_page')
-			
+				return redirect('pints_main.views.index')
+
 			except:
 				return redirect('user_login')
 
@@ -48,7 +46,7 @@ def register(request):
 		user_form = UserForm()
 		profile_form = UserProfileForm()
 
-	return render(request, 
+	return render(request,
 			'pints_user/register.html',
 			{'user_form' : user_form, 'profile_form' : profile_form, 'registered' : registered})
 
@@ -56,14 +54,14 @@ def user_login(request):
 
 	#redirect if user is already logged in
 	if request.user.is_authenticated():
-		return redirect('pints_main.views.main_page')
+		return redirect('pints_main.views.index')
 
-	
+
 	username, error_message = '', ''
 
 	if request.method == 'POST':
 		username = request.POST.get('username')
-		password = request.POST.get('password')		
+		password = request.POST.get('password')
 		next = request.POST.get('next')
 
 		# built-in django user authentication
@@ -93,14 +91,14 @@ def user_login(request):
 		next = request.GET.get('next')
 		if not next:
 			next = '/'
-			
+
 		return render(request, 'pints_user/login.html', {'username' : username, 'error_message' : error_message, 'next' : next })
 
 @login_required
 def user_logout(request):
-	
+
 	logout(request)
-	return redirect('pints_main.views.main_page')
+	return redirect('pints_main.views.index')
 
 
 

@@ -2,53 +2,98 @@
 
 {% load staticfiles %}
 
-{% block detail_title %}- {{ beer.name }} {% endblock %}
+{% block detail_title %}- {{ beer.data.name }} {% endblock %}
 
 {% block body_block %}
     <div class="page-header">
-        <a href = "{% url 'edit_beer' beer.slug %}"> edit </a>
-       <h1>{{ beer.name }}</h1>
-        <p class="lead"><a href = "{{ brewery.get_absolute_url }}">{{ brewery.name }}</a> - {{ beer.beer_style }}</p>
-    </div>
-
-    <div class="table-responsive">
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th>Your Rating</th>
-                    <th>Date Rated</th>
-                    <th>Average Rating</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>{{ beer_score.score }}</td>
-                    <td>{{ beer_score.score_date }}</td>
-                    <td>None</td>
-                </tr>
-            </tbody>
-        </table>
-
-
-    {% if user.is_authenticated %}
-    <div>
-
-        <h2> Rate this beer:</h2>
-
-        <div>
-            <form id = "beer_score_form" method = "post" action = "{{ beer.get_absolute_url }}/">
-                {% csrf_token %}
-                {% for hidden in form.hidden_fields %}
-                    {{ hidden }}
+        <div class="row">
+            <div class="col-md-6">
+               <h1>{{ beer.data.name }}</h1>
+               {% for b in beer.data.breweries %}
+                    <p class="lead"><a href = "/brewery/{{ b.id_ }}">{{ b.name }}</a> </p>
                 {% endfor %}
-
-                {% for field in form.visible_fields %}
-                    {{ field.help_text }}: {{ field }}  {{ field.errors }}
-                {% endfor %}
-                <br>
-                <input type="submit" name="submit" value="Submit Score">
-            </form>
+            </div>
         </div>
     </div>
+
+    {% if beer.data.description %}
+        <p> {{ beer.data.description }} </p>
     {% endif %}
+
+    
+    <div class="row">
+        <div class="col-sm-9 col-md-6">
+            <h3> My Rating
+
+            {% if beer_score and not edit %}
+
+                <small> <a href= "{% url 'beer_detail' beer.data.id_ %}?edit=True">(edit)</a></small>
+            
+            {% endif %}
+
+            </h3>
+
+            <div class="row">
+
+            {% if beer_score and not edit %}
+
+                <div class="col-xs-6">
+                    <p> <span class="lead"> {{ beer_score.score }} </span>/ 100 </p>
+                </div>
+
+            {% else %}
+
+                <form class="form-inline" method="post" action="{% url 'add_score' beer.data.id_ %}">
+                    {% csrf_token %}
+                    {% for hidden in form.hidden_fields %}
+                        {{ hidden }}
+                    {% endfor %}
+
+                    {% if form.errors %}                   
+                        <div class="form-group has-error has-feedback">
+                            <p style="color:red"> Rating not saved! Please enter a valid rating</p>
+                    {% else %}
+                        <div class="form-group">
+                    {% endif %}
+                            <div class="col-xs-6">
+                                <label class="sr-only" for="id_score">Beer Score (out of 100)</label>
+                                <div class="input-group">
+                                    <input class="form-control" id="id_score" name="score" type="text" placeholder="{{ form_placeholder }}"{% if edit %} value="{{ form_placeholder }}" {% endif %}/>
+                                    <div class="input-group-addon">/ 100</div>
+                                </div>
+                            </div>
+                            <div class="col-xs-3">
+                                <button type="submit" class="btn btn-default btn-small">Save</button>
+                            </div>
+                        </div>
+                </form>
+
+            {% endif %}
+            
+            </div>
+        </div>
+
+        <div class="col-sm-9 col-md-6">
+            <h3> Average Rating </h3>
+            <div class="row">
+                <div class="col-xs-6">
+                    <p>
+
+                        {% if avg_score %}
+
+                        <span class="lead">{{ avg_score }}</span>/ 100</h3>
+
+                        {% else %}
+
+                        N/A
+
+                        {% endif %}
+
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
 {% endblock %}

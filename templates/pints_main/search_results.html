@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %} Results {% endblock %}
+
+
+{% block body_block %}
+        {% if results %}
+        
+	            {% for i in results.data %}
+	            <a href="/{{ type }}/{{ i.id_ }}">
+	            <div class="row">
+	            	
+				      	<div class="col-xs-2">
+					      	{% if type == 'brewery' %}
+	    	        		<img src={{ i.images.icon }} class="img-thumbnail">
+	    	        		{% else %}
+	    	        		<img src={{ i.breweries.0.images.icon }} class="img-thumbnail">
+	    	        		{% endif %}
+	    	        	</div>
+    	        	<div class="col-xs-10">
+            		    <h3>{{ i.name }}</h3>
+
+            		    {% if type == 'beer' %}
+            		 	<p>{{ i.breweries.0.name }}</p>
+            		 	{% endif %}
+				     </div>
+
+				</div>
+				</a>
+				<hr>
+
+	            {% endfor %}
+
+	        {% if pages %}
+
+	        <nav>
+			  <ul class="pagination">
+			  		{% if p == 1 %}
+			  		<li class="disabled">
+			  		{% else %}
+			  		<li>
+			  		{% endif %}
+				      <a href="/search/?q={{ q }}&type={{ type }}&p={{ p|add:"-1" }}" aria-label="Previous">
+				        <span aria-hidden="true">&laquo;</span>
+				      </a>
+				    </li>
+			  	{% for pg in pages %}
+			  		{% if pg == p %}
+			  			<li class="active">
+			  		{% else %}
+			  			<li>
+			  		{% endif %}
+				    		<a href="/search/?q={{ q }}&type={{ type }}&p={{ pg }}">{{ pg }}</a>
+						</li>
+				{% endfor %}
+					<li>
+				      <a href="/search/?q={{ q }}&type={{ type }}&p={{ p|add:"1" }}" aria-label="Next">
+				        <span aria-hidden="true">&raquo;</span>
+				      </a>
+				    </li>
+				  </ul>
+
+			</nav>
+			{% endif %}
+
+        {% else %}
+
+        <p class="lead">No results found </p>
+
+        {% endif %}
+
+{% endblock %}

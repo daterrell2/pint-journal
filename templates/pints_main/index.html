@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block title %} Home {% endblock %}
+
+
+{% block body_block %}
+    <div class="row">
+        {% if beer_list %}
+            {% for beer in beer_list %}
+            <div class="col-xs-6 col-sm-4">
+
+                    <div class="thumbnail">
+                        <a href = "/beer/{{ beer.data.id_ }}">
+    	        		<img src={{ beer.data.breweries.0.images.medium }} class="img-thumbnail">
+            		    <div class="caption text-center">
+            		    	<h5>{{ beer.data.name }}</h5>
+                        </a>
+                        <h5>{{beer.data.score }}<small>/ 100</small></h5>
+                        </div>
+                    
+                    
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+
+        {% endif %}
+    </div>
+{% endblock %}

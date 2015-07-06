@@ -28,7 +28,7 @@
                     {% for beer in beers.data %}
                     <tr>
                         <td><a href = "/beer/{{ beer.id_ }}">{{ beer.name }} </a></td>
-                        <td>{{ beer.style.category.name }}</td>
+                        <td>{{ beer.style.name }}</td>
                         <td>
                             {% if beer.user_score %}
                                 {{ beer.user_score }}

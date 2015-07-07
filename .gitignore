@@ -1,3 +1,10 @@
+
+# Specific Files #
+##################
+/pint_journal_project/settings.py
+/pint_journal_project/dev_settings.py
+
+
 # Compiled source #
 ###################
 *.com

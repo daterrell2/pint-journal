@@ -7,11 +7,11 @@
 
 {% block body_block %}
         {% if results %}
-        
+
 	            {% for i in results.data %}
 	            <a href="/{{ type }}/{{ i.id_ }}">
 	            <div class="row">
-	            	
+
 				      	<div class="col-xs-2">
 					      	{% if type == 'brewery' %}
 	    	        		<img src={{ i.images.icon }} class="img-thumbnail">
@@ -23,7 +23,7 @@
             		    <h3>{{ i.name }}</h3>
 
             		    {% if type == 'beer' %}
-            		 	<p>{{ i.breweries.0.name }}</p>
+            		 	<a href = "/brewery/{{ i.breweries.0.id_ }}">{{ i.breweries.0.name }}</a>
             		 	{% endif %}
 				     </div>
 

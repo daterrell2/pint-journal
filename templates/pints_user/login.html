@@ -1,14 +1,16 @@
-{% extends 'user_forms.html' %}
+{% extends 'cover.html' %}
 
 {% load staticfiles %}
 
-{% block title %} - Log In {% endblock %}
-
-{% block navbar_right_items %}
-    <li><a href="{% url 'register' %}"> Register Here </a></li>
+{% block css_2_block %}
+<link href="/static/css/signin.css" rel="stylesheet">
 {% endblock %}
 
-{% block body_block %}
+{% block user_links_block %}
+<li><a href="{% url 'register' %}"> Sign up </a></li>
+{% endblock %}
+
+{% block body_mid_block %}
 
 	<link href="/static/css/signin.css" rel="stylesheet">
 

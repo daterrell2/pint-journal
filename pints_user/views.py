@@ -3,9 +3,6 @@ from pints_user.forms import UserForm, UserProfileForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
-def login_error(request, error_message):
-	return render(request, 'pints_user/login_error.html', {'error_message': error_message})
-
 def register(request):
 
 	registered = False
@@ -79,7 +76,7 @@ def user_login(request):
 
 			# inactive account
 			else:
-				redirect('login_error', error_message='Your account has been deactivated')
+				redirect('pints_main.welcome')
 		# invalid credentials
 		else:
 			print "Invalid login details: {0}, {1}".format(username, password)

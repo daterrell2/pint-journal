@@ -7,6 +7,10 @@ from utils.brewerydb import BreweryDb, BreweryDbObject
 from django.db.models import Avg
 import re
 
+def welcome(request):
+	return render(request, 'cover.html')
+
+
 @login_required
 def index(request):
 	'''
@@ -190,7 +194,7 @@ def brewery_detail(request, brewery_id):
 
 	return render(request, 'pints_main/brewery_detail.html', context_dict)
 
-
+@login_required
 def search(request):
 	context_dict = {}
 

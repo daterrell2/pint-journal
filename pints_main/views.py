@@ -8,7 +8,14 @@ from django.db.models import Avg
 import re
 
 def welcome(request):
-	return render(request, 'cover.html')
+    '''
+    Redirects logged in users to homepage.
+    Otherwises renders cover page
+    '''
+    if request.user.is_authenticated():
+		return redirect('index')
+
+    return render(request, 'cover.html')
 
 
 @login_required
@@ -83,7 +90,7 @@ def beer_detail(request, beer_id):
 	context_dict['edit'] = False
 
 	if request.method == 'POST':
-		
+
 		edit_flag=False
 
 		try:
@@ -91,10 +98,10 @@ def beer_detail(request, beer_id):
 			old_score_val = new_score.score
 			edit_flag=True
 
-	
+
 		except BeerScore.DoesNotExist:
 			new_score = BeerScore(beer=beer_id, user=user)
-		
+
 		form = BeerScoreForm(request.POST)
 
 		if form.is_valid():
@@ -127,7 +134,7 @@ def beer_detail(request, beer_id):
 	beer = BreweryDb.beer(beer_id, {'withBreweries':'Y'})
 
 	if not beer or beer.get('status') != 'success':
-		return redirect('index')		
+		return redirect('index')
 
 	context_dict['beer'] = BreweryDbObject(beer)
 
@@ -266,7 +273,7 @@ def search(request):
 
 # @login_required
 # def add_beer(request, brewery_name_slug):
- 
+
 #  	try:
 # 		brewery = Brewery.objects.get(slug=brewery_name_slug)
 

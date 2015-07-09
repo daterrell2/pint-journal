@@ -1,28 +1,25 @@
-{% extends 'base.html' %}
+{% extends 'detail.html' %}
 
 {% load staticfiles %}
 
-{% block detail_title %}- {{ beer.data.name }} {% endblock %}
+{% block title %}- {{ beer.data.name }} {% endblock %}
 
-{% block body_block %}
-    <div class="page-header">
-        <div class="row">
-            <div class="col-md-6">
-               <h1>{{ beer.data.name }}</h1>
-               {% for b in beer.data.breweries %}
-                    <p class="lead"><a href = "/brewery/{{ b.id_ }}">{{ b.name }}</a> </p>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
+{% block jumbo_block %}
+
+   <h1>{{ beer.data.name }}</h1>
+   {% for b in beer.data.breweries %}
+        <p class="lead"><a href = "/brewery/{{ b.id_ }}">{{ b.name }}</a> </p>
+    {% endfor %}
 
     {% if beer.data.description %}
-        <p> {{ beer.data.description }} </p>
+        <p> <small> {{ beer.data.description }} </small></p>
     {% endif %}
 
-    
+{% endblock %}
+
+{% block detail_block %}
     <div class="row">
-        <div class="col-sm-9 col-md-6">
+        <div class="col-md-4">
             <h3> My Rating
 
             {% if beer_score and not edit %}
@@ -33,13 +30,9 @@
 
             </h3>
 
-            <div class="row">
-
             {% if beer_score and not edit %}
 
-                <div class="col-xs-6">
                     <p> <span class="lead"> {{ beer_score.score }} </span>/ 100 </p>
-                </div>
 
             {% else %}
 
@@ -69,31 +62,24 @@
                 </form>
 
             {% endif %}
-            
-            </div>
         </div>
 
-        <div class="col-sm-9 col-md-6">
+        <div class="col-md-4">
             <h3> Average Rating </h3>
-            <div class="row">
-                <div class="col-xs-6">
-                    <p>
+            <p>
 
-                        {% if avg_score %}
+                {% if avg_score %}
 
-                        <span class="lead">{{ avg_score }}</span>/ 100</h3>
+                <span class="lead">{{ avg_score }}</span>/ 100</h3>
 
-                        {% else %}
+                {% else %}
 
-                        N/A
+                N/A
 
-                        {% endif %}
+                {% endif %}
 
-                    </p>
-                </div>
-            </div>
+            </p>
         </div>
-
     </div>
 
 {% endblock %}

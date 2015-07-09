@@ -1,0 +1,19 @@
+
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block search_block %}
+{% endblock %}
+
+{% block body_block %}  
+
+  <div class="jumbotron">
+    <div class="container">
+      <h1 class="text-center">Welcome to Pint Journal.</h1>
+      <p class="text-center">Sign up to start searching the database.</p>
+      <p class="text-center"><a class="btn btn-primary btn-lg" href="{% url 'register' %}" role="button">Get Started</a></p>
+    </div>
+  </div>
+
+{% endblock %}

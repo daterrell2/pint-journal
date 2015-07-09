@@ -1,17 +1,20 @@
-{% extends 'base.html' %}
+{% extends 'detail.html' %}
 
 {% load staticfiles %}
 
 {% block title %} - {{ brewery.data.name }} {% endblock %}
 
-{% block body_block %}
-<div class="page=header">
-    <h1>{{ brewery.data.name }}</h1>
+{% block jumbo_block %}
+
+    <h3>{{ brewery.data.name }}</h3>
 
     {% if brewery.data.website %}
-       <p class="lead">{{ brewery.data.website }}</p>
+       <p class="lead"><a href="{{ brewery.data.website }}">{{ brewery.data.website }}</a></p>
     {% endif %}
-</div>
+
+{% endblock %}
+
+{% block detail_block %}
 
 {% if beers %}
         <div class="table-responsive">
@@ -46,4 +49,5 @@
     <strong>We don't have any beers for this brewery.</strong>
 {% endif %}
     </div>
+
 {% endblock %}

@@ -1,19 +1,9 @@
-{% extends 'cover.html' %}
+{% extends 'user.html' %}
 
 {% load staticfiles %}
 
-{% block css_2_block %}
 
-<link href="/static/css/signin.css" rel="stylesheet">
-
-{% endblock %}
-
-{% block user_links_block %}
-<li><a href="{% url 'user_login' %}"> Sign In</a></li>
-{% endblock %}
-
-
-{% block body_mid_block %}
+{% block body_block %}
 	<form role="form"  method="post" action={% url 'register' %}>
 		{% csrf_token %}
 

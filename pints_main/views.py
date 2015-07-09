@@ -15,7 +15,7 @@ def welcome(request):
     if request.user.is_authenticated():
 		return redirect('index')
 
-    return render(request, 'cover.html')
+    return render(request, 'pints_main/welcome.html')
 
 
 @login_required

@@ -95,7 +95,7 @@ def user_login(request):
 def user_logout(request):
 
 	logout(request)
-	return redirect('pints_main.views.index')
+	return redirect('pints_main.views.welcome')
 
 
 

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% load staticfiles %}
+
+{% block body_block %}
+
+    <div class="jumbotron">
+      <div class="container">
+
+        {% block jumbo_block %}
+        {% endblock %}
+
+      </div>
+    </div>
+
+    <div class="container">
+
+        {% block detail_block %}
+        {% endblock %}
+        
+    </div>
+
+{% endblock %}

@@ -9,6 +9,15 @@
 		{% csrf_token %}
 
 		<h2 class="form-signin-heading"> Please Sign In </h2>
+
+		 {% if error_message %}
+	        <div class="alert alert-danger" role="alert">
+	          <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+	          <span class="sr-only">Error:</span>
+	          {{ error_message }}
+            </div>
+        {% endif %}
+        
 		<input class="form-control" placeholder="Username" id="id_username" max_length="254" name="username" type="text" value="{{username}}" required autofocus="" />
 
 		<input class="form-control" placeholder="Password" id="id_password" name="password" type="password" required />

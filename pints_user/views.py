@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.core.urlresolvers import reverse
 from pints_user.forms import UserForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -88,7 +89,7 @@ def user_login(request):
 	else:
 		# initial GET request. 'next' will be hidden input on login form
 		next = request.GET.get('next')
-		if not next:
+		if not next or next == reverse(register):
 			next = '/'
 
 		return render(request, 'pints_user/login.html', {'username' : username, 'error_message' : error_message, 'next' : next })

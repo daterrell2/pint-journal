@@ -1,51 +1,53 @@
 from django.shortcuts import render, redirect
-from pints_user.forms import UserForm, UserProfileForm
+from pints_user.forms import UserForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from models import UserProfile
+
 
 def register(request):
 
 	registered = False
 
 	if request.method == 'POST':
-		user_form = UserForm(data=request.POST)
-		profile_form = UserProfileForm(data=request.POST)
+		form = UserForm(data=request.POST)
+		#profile_form = UserProfileForm(data=request.POST)
 
-		if user_form.is_valid() and profile_form.is_valid():
-			user = user_form.save()
-			user.set_password(user.password)
-			user.save()
+		if form.is_valid():
+			new_user = User()
+			new_user.username = form.cleaned_data['username']
+			new_user.email = form.cleaned_data['email']
+			new_user.set_password(form.cleaned_data['password1'])
+			new_user.save()
 
-			profile = profile_form.save(commit=False)
-			profile.user = user
 
 			if 'picture' in request.FILES:
-				profile.picture = request.FILES['picture']
-
-			profile.save()
+				new_user_profile = UserProfile(user=new_user)
+				new_user_profile.picture = request.FILES['picture']
+				new_user_profile.save()
 
 			registered = True
 
 			# authenticate and log in new user
-			new_user = authenticate(username=request.POST.get('username'), password=request.POST.get('password'))
+			user_login = authenticate(username=new_user.username,
+									  password=request.POST.get('password1'))
 			try:
-				login(request, new_user)
-				# replace with redirect to welcome page
+				login(request, user_login)
 				return redirect('pints_main.views.index')
 
 			except:
 				return redirect('user_login')
 
 		else:
-			print user_form.errors, profile_form.errors
+			print form.errors
 
 	else:
-		user_form = UserForm()
-		profile_form = UserProfileForm()
+		form = UserForm()
 
 	return render(request,
 			'pints_user/register.html',
-			{'user_form' : user_form, 'profile_form' : profile_form, 'registered' : registered})
+			{'form' : form, 'registered' : registered})
 
 def user_login(request):
 

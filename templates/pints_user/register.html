@@ -4,7 +4,7 @@
 
 
 {% block body_block %}
-	<form role="form"  method="post" action={% url 'register' %}>
+	<form class="form-signin" role="form"  method="post" action="{% url 'register' %}">
 		{% csrf_token %}
 
 		<h2 class="form-signin-heading">Sign Up for Pint Journal</h2>

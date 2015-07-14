@@ -12,16 +12,12 @@
                 <div class="col-xs-6 col-sm-4">
 
                     <div class="thumbnail">
-                        <a href = "/beer/{{ beer.data.id_ }}">
-        	        		<img src={{ beer.data.breweries.0.images.medium }} class="img-thumbnail">
+                        <a href = "/beer/{{ beer.data.id_ }}"><img src={{ beer.data.breweries.0.images.medium }} class="img-thumbnail" alt ="{{ beer.data.name }}"></a>
                 		    <div class="caption text-center">
-                		    	<h5>{{ beer.data.name }}</h5>
-                            </a>
-                            <h5>{{beer.data.score }}<small>/ 100</small></h5>
+                		    	<a href = "/beer/{{ beer.data.id_ }}"><h5>{{ beer.data.name }}</h5></a>
+                                <h5>{{beer.data.score }}<small>/ 100</small></h5>
                             </div>
-                        </a>
                     </div>
-                        
                 </div>
             {% endfor %}
 

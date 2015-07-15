@@ -24,28 +24,41 @@ def index(request):
 
 	user = get_user(request) # None or User object
 
-	sort_choices = ['score', '-score']
+	sort_choices = ['-score', 'score']
 	display_choices = ['grid', 'list']
 	view_choices = ['user', 'all']
 
 	# get url params
-	sort_param = get_param(request, 'sort', sort_choices)
-	display_param = get_param(request, 'display', display_choices)
+	sort_param = get_param(request, 'sort', sort_choices, default='-score')
+	display_param = get_param(request, 'display', display_choices, default='grid')
 
-	sort_reverse = True
-	if sort_param[0] == '-':
-		sort_reverse = False
+	if not user:
+		view_param = 'all'
 
-	sorted_beers = sorted(Beer.objects.all(), key=lambda x: x.get_avg_score(), reverse=sort_reverse)[:12]
+	else:
+		view_param = get_param(request, 'view', view_choices, default='user')
+
+	if view_param == 'user':
+		sorted_beers = [(b.beer, b.score) for b in BeerScore.objects.filter(user=user).order_by(sort_param)[:12]]
+
+	else:
+		sort_reverse = True
+
+		if sort_param[0] != '-':
+			sort_reverse = False
+
+		q = [(b, b.get_avg_score()) for b in Beer.objects.all() if b.get_avg_score()]
+		sorted_beers = sorted(q, key=lambda x: x[1], reverse=sort_reverse)[:12]
+	
 	beer_list = []
 
 	for b in sorted_beers:
-		beer = BreweryDb.beer(b.beer_id, {'withBreweries':'Y'})
+		beer = BreweryDb.beer(b[0].beer_id, {'withBreweries':'Y'})
 		if beer and beer.get('status') == 'success':
-			beer['data']['score'] = b.get_avg_score()
+			beer['data']['score'] = b[1]
 			beer_list.append(beer)
 
-	context_dict = {'beer_list': beer_list, 'user' : user}
+	context_dict = {'beer_list': beer_list, 'user' : user, 'view':view_param, 'display':display_param, 'sort':sort_param}
 	return render(request, 'pints_main/index_grid.html', context_dict)
 
 # implement next
@@ -72,6 +85,7 @@ def beer_detail(request, beer_id):
 	context_dict = {}
 
 	user=User.objects.get(id=request.user.id)
+	beer=Beer.objects.get_or_create(beer_id=beer_id)[0]
 
 	context_dict['user'] = user
 	context_dict['form_placeholder'] = 'score'
@@ -82,13 +96,13 @@ def beer_detail(request, beer_id):
 		edit_flag=False
 
 		try:
-			new_score = BeerScore.objects.get(beer=beer_id, user=user)
+			new_score = BeerScore.objects.get(beer=beer, user=user)
 			old_score_val = new_score.score
 			edit_flag=True
 
 
 		except BeerScore.DoesNotExist:
-			new_score = BeerScore(beer=beer_id, user=user)
+			new_score = BeerScore(beer=beer, user=user)
 
 		form = BeerScoreForm(request.POST)
 
@@ -97,13 +111,11 @@ def beer_detail(request, beer_id):
 			new_score.score = form_score.score
 
 			if not edit_flag:
-				new_score.user = user
-				new_score.beer = beer_id
 				new_score.save()
 			else:
 				new_score.save()
 				if new_score.score != old_score_val:
-					old_score = BeerScoreArchive(beer=beer_id, user=user, score=old_score_val)
+					old_score = BeerScoreArchive(beer=beer, user=user, score=old_score_val)
 					old_score.save()
 
 			return redirect('/beer/' + beer_id)
@@ -119,28 +131,26 @@ def beer_detail(request, beer_id):
 	context_dict['form'] = form
 
 	# Beer Details
-	beer = BreweryDb.beer(beer_id, {'withBreweries':'Y'})
+	beer_details = BreweryDb.beer(beer.beer_id, {'withBreweries':'Y'})
 
-	if not beer or beer.get('status') != 'success':
+	if not beer_details or beer_details.get('status') != 'success':
 		return redirect('index')
 
-	context_dict['beer'] = BreweryDbObject(beer)
+	context_dict['beer'] = beer
+	context_dict['beer_details'] = beer_details
 
-	# User score
-	beer_score = BeerScore.objects.filter(beer = beer_id, user = user)
-	if beer_score:
-		context_dict['beer_score'] = beer_score[0]
-		context_dict['form_placeholder'] = beer_score[0].score
-		if request.GET.get('edit') == 'True':
+	try:
+		score = BeerScore.objects.get(beer=beer, user=user)
+		context_dict['form_placeholder'] = score
+		context_dict['beer_score'] = score
+
+	except BeerScore.DoesNotExist:
+		context_dict['beer_score'] = None
+
+	context_dict['avg_score'] = beer.get_avg_score()
+		
+	if request.GET.get('edit') == 'True':
 			context_dict['edit'] = True
-
-	# Average score
-	all_scores = BeerScore.objects.filter(beer=beer_id)
-	if all_scores:
-		 avg_score = all_scores.aggregate(Avg('score'))['score__avg']
-		 context_dict['avg_score'] = int(round(avg_score))
-	else:
-		context_dict['avg_score'] = None
 
 	return render(request, 'pints_main/beer_detail.html', context_dict)
 

@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block css_block %}
+<link href="/static/css/index.css" rel="stylesheet">
+{% endblock %}
+
+{% load staticfiles %}
+
+{% block title %} Home {% endblock %}
+
+
+{% block body_block %}
+    <div class="row">
+        <ul class="nav nav-tabs nav-justified">
+            <li role="presentation" class="active"><a href="/"> Top Beers </a></li>
+            <li role="presentation"><a href="/">Recent Beers </a></li>
+            <li role="presentation"><a href="/"> My Beers </a></li>
+        </ul>
+    </div>
+
+    {% block list_block %}
+    {% endblock %}
+
+{% endblock %}

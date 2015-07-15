@@ -42,6 +42,7 @@ def index(request):
 	# get url params
 	sort_param = request.GET.get('sort')
 	view_param = request.GET.get('view')
+	display_param = request.GET.get('display')
 
 	if sort_param and re.match(sort_pattern, sort_param):
 		sort = sort_param
@@ -64,7 +65,7 @@ def index(request):
 			beer_list.append(BreweryDbObject(beer))
 
 	context_dict = {'beer_list': beer_list}
-	return render(request, 'pints_main/index.html', context_dict)
+	return render(request, 'pints_main/index_grid.html', context_dict)
 
 @login_required
 def beer_detail(request, beer_id):

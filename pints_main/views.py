@@ -1,9 +1,12 @@
 from django.shortcuts import render, redirect
-from pints_main.models import BeerScore, BeerScoreArchive
+from pints_main.models import BeerScore, BeerScoreArchive, Beer
 from pints_main.forms import BeerScoreForm
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from utils.brewerydb import BreweryDb, BreweryDbObject
+from pints_user.model_utils import get_user
+from model_utils import get_sorted_avg
+from utils.url_params import get_param
 from django.db.models import Avg
 import re
 
@@ -17,54 +20,34 @@ def welcome(request):
 
     return render(request, 'pints_main/welcome.html')
 
-
-@login_required
 def index(request):
 	'''
 	Looks for query string in url '?view=beer' or '?view=brewery' and renders
 	index.html with appropriate object. Default view is 'beer'
 	'''
 
-	if not request.user.is_authenticated:
-		user = None
+	user = get_user(request) # None or User object
 
-	else:
-		try:
-			user=User.objects.get(id=request.user.id)
-		except User.DoesNotExist:
-			user = None
-
-	scores = []
-	sort_choices = ['^-?score_date$', '^-?score$']
-	sort_pattern = '|'.join(sort_choices)
-	default_sort = '-score_date'
+	sort_choices = ['score', '-score']
+	display_choices = ['grid', 'list']
 
 	# get url params
-	sort_param = request.GET.get('sort')
-	view_param = request.GET.get('view')
-	display_param = request.GET.get('display')
+	sort_param = get_param(request=request, param='sort', options=sort_choices, default=sort_choices[0])
+	display_param = get_param(request=request, param='display', options=display_choices)
 
-	if sort_param and re.match(sort_pattern, sort_param):
-		sort = sort_param
-	else:
-		sort = default_sort
+	sort_reverse = True
+	if sort_param[0] == '-':
+		sort_reverse = False
 
-	if user and view_param != 'all':
-		scores = BeerScore.objects.filter(user=user)
-		if scores:
-			scores = scores.order_by(sort)[:6]
-
-	else:
-		scores = BeerScore.objects.order_by(sort)[:6]
-
+	beers = get_sorted_avg(sort_reverse=sort_reverse, limit=12)
 	beer_list = []
-	for score in scores:
-		beer = BreweryDb.beer(score.beer, {'withBreweries':'Y'})
+	for b in beers:
+		beer = BreweryDb.beer(b.beer_id, {'withBreweries':'Y'})
 		if beer and beer.get('status') == 'success':
-			beer['data']['score'] = score
-			beer_list.append(BreweryDbObject(beer))
+			beer['data']['score'] = int(round(b.score))
+			beer_list.append(beer)
 
-	context_dict = {'beer_list': beer_list}
+	context_dict = {'beer_list': beer_list, 'user' : user}
 	return render(request, 'pints_main/index_grid.html', context_dict)
 
 @login_required

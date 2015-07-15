@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from utils.brewerydb import BreweryDb, BreweryDbObject
 from pints_user.model_utils import get_user
-from model_utils import get_sorted_avg
+from model_utils import sorted_avg
 from utils.url_params import get_param
 from django.db.models import Avg
 import re
@@ -21,34 +21,38 @@ def welcome(request):
     return render(request, 'pints_main/welcome.html')
 
 def index(request):
-	'''
-	Looks for query string in url '?view=beer' or '?view=brewery' and renders
-	index.html with appropriate object. Default view is 'beer'
-	'''
 
 	user = get_user(request) # None or User object
 
 	sort_choices = ['score', '-score']
 	display_choices = ['grid', 'list']
+	view_choices = ['user', 'all']
 
 	# get url params
-	sort_param = get_param(request=request, param='sort', options=sort_choices, default=sort_choices[0])
-	display_param = get_param(request=request, param='display', options=display_choices)
+	sort_param = get_param(request, 'sort', sort_choices)
+	display_param = get_param(request, 'display', display_choices)
 
 	sort_reverse = True
 	if sort_param[0] == '-':
 		sort_reverse = False
 
-	beers = get_sorted_avg(sort_reverse=sort_reverse, limit=12)
+	sorted_beers = sorted(Beer.objects.all(), key=lambda x: x.get_avg_score(), reverse=sort_reverse)[:12]
 	beer_list = []
-	for b in beers:
+
+	for b in sorted_beers:
 		beer = BreweryDb.beer(b.beer_id, {'withBreweries':'Y'})
 		if beer and beer.get('status') == 'success':
-			beer['data']['score'] = int(round(b.score))
+			beer['data']['score'] = b.get_avg_score()
 			beer_list.append(beer)
 
 	context_dict = {'beer_list': beer_list, 'user' : user}
 	return render(request, 'pints_main/index_grid.html', context_dict)
+
+# implement next
+@login_required
+def user_main(request):
+	return None
+
 
 @login_required
 def beer_detail(request, beer_id):

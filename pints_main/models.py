@@ -3,8 +3,14 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth.models import User
 from utils import brewerydb
 
+class Beer(models.Model):
+	beer_id = models.CharField(max_length=128, blank=False, unique=True)
+
+	def __unicode__(self):
+		return str(self.beer_id)
+
 class BeerScore(models.Model):
-	beer = models.CharField(max_length=128, blank=False) # id of beer in BreweryDB, called via API
+	beer = models.ForeignKey(Beer, blank=False)
 	user = models.ForeignKey(User, blank=False)
 	score = models.IntegerField(
 		default=1,
@@ -25,7 +31,7 @@ class BeerScoreArchive(models.Model):
 	'''
 	stores user's score history for each beer.
 	'''
-	beer = models.CharField(max_length=128, blank=False)
+	beer = models.ForeignKey(Beer, blank=False)
 	user = models.ForeignKey(User, blank=False)
 	score = models.IntegerField(
 		default=1,

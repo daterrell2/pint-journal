@@ -4,21 +4,31 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'pint_journal_project.settings')
 import django
 django.setup()
 
-from pints_main.models import BeerScore
+from pints_main.models import BeerScore, Beer
 from pints_main.utils.brewerydb import *
 from django.contrib.auth.models import User
 
-user = User.objects.get(username=u'david')
+users = [User.objects.get(username=u) for u in [u'david', u'david_test', u'new']]
 
 def populate():
 
-	beers = ['zGBmz4', 'kZsjqY', '9KiCpK', 'Kax7jD', 'nEEnk1', 'kckAgC']
+	beer_ids = ['zGBmz4', 'kZsjqY', '9KiCpK', 'Kax7jD', 'nEEnk1', 'kckAgC']
 	BeerScore.objects.all().delete()
+	Beer.objects.all().delete()
+
+	beers = [add_beer(i) for i in beer_ids]
+
 	for i in range(len(beers)):
-		add_score(beers[i], 80+i)
+		for n in range(len(users)):
+			add_score(beers[i], 80+i+n, users[n])
+
+def add_beer(beer_id):
+	b = Beer(beer_id = beer_id)
+	b.save()
+	return b
 
 
-def add_score(beer, score, user=user):
+def add_score(beer, score, user):
 	s = BeerScore()
 	s.beer = beer
 	s.user = user

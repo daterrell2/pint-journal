@@ -14,7 +14,9 @@
         <ul class="nav nav-tabs nav-justified">
             <li role="presentation" class="active"><a href="/"> Top Beers </a></li>
             <li role="presentation"><a href="/">Recent Beers </a></li>
+            {% if user %}
             <li role="presentation"><a href="/"> My Beers </a></li>
+            {% endif %}
         </ul>
     </div>
 

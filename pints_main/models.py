@@ -14,8 +14,20 @@ class Beer(models.Model):
 		returns average beerscore for beer
 		'''
 		scores = BeerScore.objects.filter(beer=self)
-		avg_score = scores.aggregate(models.Avg('score'))['score__avg']
-		return int(round(avg_score))
+		if scores:
+			avg_score = scores.aggregate(models.Avg('score'))['score__avg']
+			return int(round(avg_score))
+
+		return None
+
+	def get_user_score(self, user):
+
+		try:
+			score = BeerScore.objects.get(beer=self, user=user)
+		except BeerScore.DoesNotExist:
+			score = None
+
+		return score
 
 
 class BeerScore(models.Model):

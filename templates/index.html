@@ -10,15 +10,30 @@
 
 
 {% block body_block %}
-    <div class="row">
-        <ul class="nav nav-tabs nav-justified">
-            <li role="presentation" class="active"><a href="/"> Top Beers </a></li>
-            <li role="presentation"><a href="/">Recent Beers </a></li>
-            {% if user %}
-            <li role="presentation"><a href="/"> My Beers </a></li>
-            {% endif %}
-        </ul>
-    </div>
+    {% if user %}
+        <div class="row">
+            <ul class="nav nav-tabs nav-justified">
+                {% if view == 'user' %}
+                <li role="presentation" class="active">
+                {% else %}
+                <li role="presentation">
+                {% endif %}
+                    <a href="{% url 'index' %}?view=user"> My Beers </a>
+                </li>
+
+                {% if view == 'all' %}
+                <li role="presentation" class="active">
+                {% else %}
+                <li role="presentation">
+                {% endif %}
+                    <a href="{% url 'index' %}?view=all"> Top Beers </a>
+                </li>
+                <li role="presentation">
+                    <a href="/">Recent Beers </a>
+                </li>
+            </ul>
+        </div>
+    {% endif %}
 
     {% block list_block %}
     {% endblock %}

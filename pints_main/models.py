@@ -9,6 +9,15 @@ class Beer(models.Model):
 	def __unicode__(self):
 		return str(self.beer_id)
 
+	def get_avg_score(self):
+		'''
+		returns average beerscore for beer
+		'''
+		scores = BeerScore.objects.filter(beer=self)
+		avg_score = scores.aggregate(models.Avg('score'))['score__avg']
+		return int(round(avg_score))
+
+
 class BeerScore(models.Model):
 	beer = models.ForeignKey(Beer, blank=False)
 	user = models.ForeignKey(User, blank=False)

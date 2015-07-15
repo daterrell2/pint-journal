@@ -1,6 +1,6 @@
 import re
 
-def get_param(request, param, options, default = None):
+def get_param(request, param, options):
 	'''
 	Finds value of param in Django request.GET.
 	If value is in list options, returns value.
@@ -12,6 +12,6 @@ def get_param(request, param, options, default = None):
 	if v in options:
 		return v
 
-	return default
+	return options[0]
 
 

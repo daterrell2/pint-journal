@@ -9,30 +9,10 @@ class Beer(models.Model):
 	def __unicode__(self):
 		return str(self.beer_id)
 
-	def get_avg_score(self):
-		'''
-		returns average beerscore for beer
-		'''
-		scores = BeerScore.objects.filter(beer=self)
-		if scores:
-			avg_score = scores.aggregate(models.Avg('score'))['score__avg']
-			return int(round(avg_score))
-
-		return None
-
-	def get_user_score(self, user):
-
-		try:
-			score = BeerScore.objects.get(beer=self, user=user)
-		except BeerScore.DoesNotExist:
-			score = None
-
-		return score
-
 
 class BeerScore(models.Model):
-	beer = models.ForeignKey(Beer, blank=False)
-	user = models.ForeignKey(User, blank=False)
+	beer = models.ForeignKey(Beer, blank=False, related_name='beerscores')
+	user = models.ForeignKey(User, blank=False, related_name = 'beerscores')
 	score = models.IntegerField(
 		default=1,
         validators=[
@@ -52,8 +32,8 @@ class BeerScoreArchive(models.Model):
 	'''
 	stores user's score history for each beer.
 	'''
-	beer = models.ForeignKey(Beer, blank=False)
-	user = models.ForeignKey(User, blank=False)
+	beer = models.ForeignKey(Beer, blank=False, related_name='beerscore_archives')
+	user = models.ForeignKey(User, blank=False, related_name = 'beerscore_archives')
 	score = models.IntegerField(
 		default=1,
         validators=[

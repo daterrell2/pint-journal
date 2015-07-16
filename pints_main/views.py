@@ -5,9 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from utils.brewerydb import BreweryDb, BreweryDbObject
 from pints_user.model_utils import get_user
-from model_utils import sorted_avg
 from utils.url_params import get_param
-from django.db.models import Avg
+from django.db.models import Avg, Count
 import re
 
 def welcome(request):
@@ -31,41 +30,38 @@ def index(request):
 	# get url params
 	sort_param = get_param(request, 'sort', sort_choices, default='-score')
 	display_param = get_param(request, 'display', display_choices, default='grid')
+	view_param = get_param(request, 'view', view_choices, default='user')
 
-	if not user:
-		view_param = 'all'
-
-	else:
-		view_param = get_param(request, 'view', view_choices, default='user')
-
-	if view_param == 'user':
-		sorted_beers = [(b.beer, b.score) for b in BeerScore.objects.filter(user=user).order_by(sort_param)[:12]]
+	if user and view_param == 'user':
+		scores = user.beerscores.all().order_by(sort_param)
+		beers = [b.beer for b in scores]
 
 	else:
-		sort_reverse = True
-
-		if sort_param[0] != '-':
-			sort_reverse = False
-
-		q = [(b, b.get_avg_score()) for b in Beer.objects.all() if b.get_avg_score()]
-		sorted_beers = sorted(q, key=lambda x: x[1], reverse=sort_reverse)[:12]
+		beer_count = Beer.objects.annotate(num_scores=Count('beerscores')).filter(num_scores__gte=2)
+		beers = beer_count.annotate(score = Avg('beerscores__score')).order_by(sort_param)
 	
 	beer_list = []
 
-	for b in sorted_beers:
-		beer = BreweryDb.beer(b[0].beer_id, {'withBreweries':'Y'})
-		if beer and beer.get('status') == 'success':
-			beer['data']['score'] = b[1]
-			beer_list.append(beer)
+	for beer in beers:
+		try:
+			user_score = beer.beerscores.get(user=user)
+
+		except BeerScore.DoesNotExist:
+			user_score = None
+
+		if beer.beerscores.count() > 2:
+			avg_score = int(round(beer.beerscores.aggregate(avg_score = Avg('score'))['avg_score']))
+		else:
+			avg_score = None
+
+		b = BreweryDb.beer(beer.beer_id, {'withBreweries':'Y'})
+		if b and b.get('status') == 'success':
+			b['data']['user_score'] = user_score
+			b['data']['avg_score'] = avg_score
+			beer_list.append(b)
 
 	context_dict = {'beer_list': beer_list, 'user' : user, 'view':view_param, 'display':display_param, 'sort':sort_param}
 	return render(request, 'pints_main/index_grid.html', context_dict)
-
-# implement next
-@login_required
-def user_main(request):
-	return None
-
 
 @login_required
 def beer_detail(request, beer_id):
@@ -147,7 +143,8 @@ def beer_detail(request, beer_id):
 	except BeerScore.DoesNotExist:
 		context_dict['beer_score'] = None
 
-	context_dict['avg_score'] = beer.get_avg_score()
+	if beer.beerscores.count() > 1:
+		context_dict['avg_score'] = int(round(beer.beerscores.aggregate(a = Avg('score'))['a']))
 		
 	if request.GET.get('edit') == 'True':
 			context_dict['edit'] = True

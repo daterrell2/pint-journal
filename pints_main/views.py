@@ -70,7 +70,6 @@ def index(request):
 	context_dict = {'beer_list': beer_list, 'user' : user, 'view':view_param, 'display':display_param, 'sort':sort_param}
 	return render(request, 'pints_main/index_grid.html', context_dict)
 
-@login_required
 def beer_detail(request, beer_id):
 	'''
 	Renders page for a single beer.
@@ -87,7 +86,7 @@ def beer_detail(request, beer_id):
 
 	context_dict = {}
 
-	user=User.objects.get(id=request.user.id)
+	user=get_user(request) # None or user object
 	beer=Beer.objects.get_or_create(beer_id=beer_id)[0]
 
 	context_dict['user'] = user
@@ -156,12 +155,15 @@ def beer_detail(request, beer_id):
 	if request.GET.get('edit') == 'True':
 			context_dict['edit'] = True
 
+	if user:
+		return render(request, 'pints_main/beer_detail_user.html', context_dict)		
+
 	return render(request, 'pints_main/beer_detail.html', context_dict)
 
 @login_required
 def add_score(request, beer_id):
 	'''
-	Handles AJAX request/ response for scores
+	Handles AJAX request/ response for if
 	'''
 
 	if request.method == 'POST':

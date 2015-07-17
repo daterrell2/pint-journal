@@ -35,8 +35,10 @@
                         <td>
                             {% if beer.user_score %}
                                 {{ beer.user_score }}
-                            {% else %}
+                            {% elif user %}
                                 Not Rated
+                            {% else %}
+                                <a href = "{% url 'user_login' %}"> Log in </a> to rate.
                             {% endif %}
                         </td>
                         <td>{{ beer.avg_score }}</td>

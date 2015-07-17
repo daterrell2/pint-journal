@@ -5,48 +5,22 @@
 {% block title %}- {{ beer_details.data.name }} {% endblock %}
 
 {% block user_score_block %}
+    <h3> My Rating </h3>
 
-        <div id="score-content">
-  
-            {% if beer_score and not edit %}
-            <h3> 
-                My Rating <small> <a href= "{% url 'beer_detail' beer.beer_id %}?edit=True">(edit)</a></small>
-            </h3>
-            
-            <p> <span class="lead"> {{ beer_score.score }} </span>/ 100 </p>
-
-            {% else %}
-
-            <h3>
-                My Rating <small> <a href= "{% url 'beer_detail' beer.beer_id %}">(back)</a></small>
-            </h3>
-
-            <form class="form-inline" id="score-form" method="post" action="{% url 'add_score' beer.beer_id %}">
-                {% csrf_token %}
-                <div class="form-group">
-                    <div class="form-group has-error has-feedback" id="score-form-errors" style="display: none;">
-                        <p style="color:red"> Rating not saved! Please enter a valid rating</p>
-                    </div>
-
-                    <div class="col-xs-6">
-                        <label class="sr-only" for="score-val">Beer Score (out of 100)</label>
-                        <div class="input-group">
-                            <input class="form-control" id="score-val" name="score" type="text" placeholder="{{ form_placeholder }}"{% if edit %} value="{{ form_placeholder }}" {% endif %}/>
-                            <div class="input-group-addon">/ 100</div>
-                        </div>
-                    </div>
-                    <div class="col-xs-3">
-                        <button type="submit" class="btn btn-default btn-small">Save</button>
-                    </div>
-                </div>
-            </form>
-
-            {% endif %}
-
-        </div>
+    <div id="score-content" data-form-url="{% url 'get_form' beer.beer_id %}">
+    </div>
 
 {% endblock %}
 
 {% block js_block %}
-<script src="/static/js/pints_main_ajax.js"></script>
+<script>
+    $(document).ready(function(){
+        $.get("{% url 'get_score' beer.beer_id %}", function(data){
+        $("#score-content").html(data);
+        console.log("load was performed");
+        });  
+    });
+
+</script>
+
 {% endblock %}

@@ -49,7 +49,6 @@ $.ajaxSetup({
     }
 });
 
-
 //Ajax for beer score submissions
 
 $('#score-form').on('submit', function(event){
@@ -69,7 +68,11 @@ function add_score() {
 
         // handle a successful response
         success : function(json) {
-            $('#score_val').val(''); // remove the value from the input
+            //get rendered html with score
+            $.get(json.score_url, function(data){
+                $("#score-content").html(data);
+                console.log("load was performed");
+                });  
             console.log(json); // log the returned json to the console
             console.log("success"); // another sanity check
         },

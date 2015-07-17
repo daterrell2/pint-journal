@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, HttpResponse
 from pints_main.models import BeerScore, BeerScoreArchive, Beer
 from pints_main.forms import BeerScoreForm
 from django.contrib.auth.decorators import login_required
@@ -8,6 +8,7 @@ from pints_user.model_utils import get_user
 from utils.url_params import get_param
 from django.db.models import Avg, Count
 import re
+import json
 
 def welcome(request):
     '''
@@ -20,6 +21,11 @@ def welcome(request):
     return render(request, 'pints_main/welcome.html')
 
 def index(request):
+	'''
+	Generates sorted list of beers based on url querystring.
+	Renders beer list either to grid template (index_grid.html)
+		or list template(index_list.html)
+	'''
 
 	user = get_user(request) # None or User object
 
@@ -37,7 +43,8 @@ def index(request):
 		beers = [b.beer for b in scores]
 
 	else:
-		beer_count = Beer.objects.annotate(num_scores=Count('beerscores')).filter(num_scores__gte=2)
+		view_param = 'all'
+		beer_count = Beer.objects.annotate(num_scores=Count('beerscores')).filter(num_scores__gte=2) # only average beers with more than one score
 		beers = beer_count.annotate(score = Avg('beerscores__score')).order_by(sort_param)
 	
 	beer_list = []
@@ -150,6 +157,54 @@ def beer_detail(request, beer_id):
 			context_dict['edit'] = True
 
 	return render(request, 'pints_main/beer_detail.html', context_dict)
+
+@login_required
+def add_score(request, beer_id):
+	'''
+	Handles AJAX request/ response for scores
+	'''
+
+	if request.method == 'POST':
+
+		print "POST!!"
+
+		user=User.objects.get(id=request.user.id)
+		beer=Beer.objects.get_or_create(beer_id=beer_id)[0]
+
+		response_data = {}
+
+		score_val = request.POST.get('the_post')
+
+		try:
+			score_val = int(score_val)
+			if score_val in range(101):
+				score = BeerScore.objects.get_or_create(beer=beer, user=user)[0]
+				score.score = score_val
+				score.save()
+
+				response_data['result'] = 'Success!'
+				response_data['score'] = str(score_val)
+
+			else:
+				response_data['result'] = 'error1'
+				response_data['error'] = 'Invalid score' 
+
+
+		except TypeError:
+			response_data['result'] = 'error2'
+			response_data['error'] = 'Invalid score'
+
+		return HttpResponse(
+			json.dumps(response_data),
+			content_type="application/json"
+			)
+	else:
+		return HttpResponse(
+			json.dumps({"nothing to see": "this isn't happening"}),
+			content_type="application/json"
+			)		
+
+
 
 @login_required
 def brewery_detail(request, brewery_id):

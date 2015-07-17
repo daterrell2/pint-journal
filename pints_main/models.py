@@ -28,6 +28,20 @@ class BeerScore(models.Model):
 	def __unicode__(self):
 		return str(self.score)
 
+	def save(self, *args, **kwargs):
+		'''
+		Automatically add old score to BeerScoreArchive
+		if different from new score
+		'''
+		if self.pk:
+			old_score = BeerScore.objects.get(pk=self.pk).score
+			if self.score != old_score:
+				archive = BeerScoreArchive(beer=self.beer, user=self.user, score=old_score)
+				archive.save()
+
+		super(BeerScore, self).save(*args, **kwargs)
+
+
 class BeerScoreArchive(models.Model):
 	'''
 	stores user's score history for each beer.

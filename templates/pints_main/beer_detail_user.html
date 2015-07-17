@@ -2,26 +2,9 @@
 
 {% load staticfiles %}
 
-{% block title %}- {{ beer_details.data.name }} {% endblock %}
+{% block scores_block %}
 
-{% block jumbo_block %}
-
-   <h1>{{ beer_details.data.name }}</h1>
-   {% for b in beer_details.data.breweries %}
-        <p class="lead"><a href = "/brewery/{{ b.id }}">{{ b.name }}</a> </p>
-    {% endfor %}
-
-    
-    {% block scores_block %}
-    {% endblock %}
-<!--     {% if beer_details.data.description %}
-        <p> <small> {{ beer_details.data.description }} </small></p>
-    {% endif %} -->
-
-{% endblock %}
-
-{% block detail_block %}
-    <div class="row">
+<div class="row">
         <div class="col-md-4">
             <h3> My Rating
 
@@ -52,9 +35,9 @@
                         <div class="form-group">
                     {% endif %}
                             <div class="col-xs-6">
-                                <label class="sr-only" for="score-val">Beer Score (out of 100)</label>
+                                <label class="sr-only" for="id_score">Beer Score (out of 100)</label>
                                 <div class="input-group">
-                                    <input class="form-control" id="score-val" name="score" type="text" placeholder="{{ form_placeholder }}"{% if edit %} value="{{ form_placeholder }}" {% endif %}/>
+                                    <input class="form-control" id="id_score" name="score" type="text" placeholder="{{ form_placeholder }}"{% if edit %} value="{{ form_placeholder }}" {% endif %}/>
                                     <div class="input-group-addon">/ 100</div>
                                 </div>
                             </div>
@@ -85,9 +68,6 @@
         </div>
     </div>
 
-{% endblock %}
+    {% endblock %}
 
-{% block js_block %}
-<script src="/static/js/pints_main.js"></script>
-{% endblock %}
-
+    

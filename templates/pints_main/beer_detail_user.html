@@ -1,73 +1,52 @@
-{% extends 'detail.html' %}
+{% extends 'pints_main/beer_detail.html' %}
 
 {% load staticfiles %}
 
-{% block scores_block %}
+{% block title %}- {{ beer_details.data.name }} {% endblock %}
 
-<div class="row">
-        <div class="col-md-4">
-            <h3> My Rating
+{% block user_score_block %}
 
+        <div id="score-content">
+  
             {% if beer_score and not edit %}
-
-                <small> <a href= "{% url 'beer_detail' beer.beer_id %}?edit=True">(edit)</a></small>
-            
-            {% endif %}
-
+            <h3> 
+                My Rating <small> <a href= "{% url 'beer_detail' beer.beer_id %}?edit=True">(edit)</a></small>
             </h3>
-
-            {% if beer_score and not edit %}
-
-                    <p> <span class="lead"> {{ beer_score.score }} </span>/ 100 </p>
+            
+            <p> <span class="lead"> {{ beer_score.score }} </span>/ 100 </p>
 
             {% else %}
 
-                <form class="form-inline" id="score-form" method="post" action="{% url 'add_score' beer.beer_id %}">
-                    {% csrf_token %}
-                    {% for hidden in form.hidden_fields %}
-                        {{ hidden }}
-                    {% endfor %}
+            <h3>
+                My Rating <small> <a href= "{% url 'beer_detail' beer.beer_id %}">(back)</a></small>
+            </h3>
 
-                    {% if form.errors %}                   
-                        <div class="form-group has-error has-feedback">
-                            <p style="color:red"> Rating not saved! Please enter a valid rating</p>
-                    {% else %}
-                        <div class="form-group">
-                    {% endif %}
-                            <div class="col-xs-6">
-                                <label class="sr-only" for="id_score">Beer Score (out of 100)</label>
-                                <div class="input-group">
-                                    <input class="form-control" id="id_score" name="score" type="text" placeholder="{{ form_placeholder }}"{% if edit %} value="{{ form_placeholder }}" {% endif %}/>
-                                    <div class="input-group-addon">/ 100</div>
-                                </div>
-                            </div>
-                            <div class="col-xs-3">
-                                <button type="submit" class="btn btn-default btn-small">Save</button>
-                            </div>
+            <form class="form-inline" id="score-form" method="post" action="{% url 'add_score' beer.beer_id %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <div class="form-group has-error has-feedback" id="score-form-errors" style="display: none;">
+                        <p style="color:red"> Rating not saved! Please enter a valid rating</p>
+                    </div>
+
+                    <div class="col-xs-6">
+                        <label class="sr-only" for="score-val">Beer Score (out of 100)</label>
+                        <div class="input-group">
+                            <input class="form-control" id="score-val" name="score" type="text" placeholder="{{ form_placeholder }}"{% if edit %} value="{{ form_placeholder }}" {% endif %}/>
+                            <div class="input-group-addon">/ 100</div>
                         </div>
-                </form>
+                    </div>
+                    <div class="col-xs-3">
+                        <button type="submit" class="btn btn-default btn-small">Save</button>
+                    </div>
+                </div>
+            </form>
 
             {% endif %}
+
         </div>
 
-        <div class="col-md-4">
-            <h3> Average Rating </h3>
-            <p>
+{% endblock %}
 
-                {% if avg_score %}
-
-                <span class="lead">{{ avg_score }}</span>/ 100</h3>
-
-                {% else %}
-
-                N/A
-
-                {% endif %}
-
-            </p>
-        </div>
-    </div>
-
-    {% endblock %}
-
-    
+{% block js_block %}
+<script src="/static/js/pints_main_ajax.js"></script>
+{% endblock %}

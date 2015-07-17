@@ -1,0 +1,23 @@
+{% if beer_score %}
+
+<p> <span class="lead"> {{ beer_score.score }} </span>/ 100 
+    <button class="btn btn-default btn-small" id="score-add-edit"> Edit </button>
+</p>
+
+
+{% else %}
+
+<p class="lead"> No score 
+<button class="btn btn-default btn-small" id="score-add-edit"> Add Score </button>
+</p>
+
+{% endif %}
+
+<script>
+    $("#score-add-edit").click(function(){
+        $.get("{% url 'get_form' beer.beer_id %}", function(data){
+            $("#score-content").html(data);
+            console.log("load was performed");
+            });
+    });
+</script>

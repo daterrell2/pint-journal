@@ -1,10 +1,9 @@
 from django import forms
-from pints_user.models import UserProfile
 from django.contrib.auth.models import User
 
 class UserForm(forms.Form):
 	username = forms.CharField(label='Username')
-	email = forms.EmailField(label = 'Email')
+	email = forms.EmailField(label = 'Email', required=False)
 	password1 = forms.CharField(widget=forms.PasswordInput(), label = 'Password')
 	password2 = forms.CharField(widget=forms.PasswordInput(), label = 'Verify Password')
 	picture = forms.ImageField(label = 'Profile Picture', required=False)

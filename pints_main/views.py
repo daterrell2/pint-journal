@@ -1,13 +1,11 @@
 from django.shortcuts import render, redirect, HttpResponse
-from pints_main.models import BeerScore, BeerScoreArchive, Beer
-from pints_main.forms import BeerScoreForm
+from pints_main.models import BeerScore, Beer
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from utils.brewerydb import BreweryDb, BreweryDbObject
 from pints_user.model_utils import get_user
 from utils.url_params import get_param
 from django.db.models import Avg, Count
-import re
 import json
 
 def welcome(request):
@@ -22,7 +20,7 @@ def welcome(request):
 
 def index(request):
 	'''
-	Generates sorted list of beers based on url querystring.
+	Generates sorted list of beers based on url query string.
 	Renders beer list either to grid template (index_grid.html)
 		or list template(index_list.html)
 	'''
@@ -46,7 +44,7 @@ def index(request):
 		view_param = 'all'
 		beer_count = Beer.objects.annotate(num_scores=Count('beerscores')).filter(num_scores__gte=2) # only average beers with more than one score
 		beers = beer_count.annotate(score = Avg('beerscores__score')).order_by(sort_param)
-	
+
 	beer_list = []
 
 	for beer in beers:
@@ -56,11 +54,12 @@ def index(request):
 		except BeerScore.DoesNotExist:
 			user_score = None
 
-		if beer.beerscores.count() > 2:
+		if beer.beerscores.count() >= 2:
 			avg_score = int(round(beer.beerscores.aggregate(avg_score = Avg('score'))['avg_score']))
 		else:
 			avg_score = None
 
+		# API call to BreweryDb
 		b = BreweryDb.beer(beer.beer_id, {'withBreweries':'Y'})
 		if b and b.get('status') == 'success':
 			b['data']['user_score'] = user_score
@@ -77,7 +76,7 @@ def beer_detail(request, beer_id):
 	If user is logged in, pulls in beer score/ button to add or edit score
 		via AJAX requests to get_score() and get_form().
 
-	Users score POST requests are handled via AJAX post to add_score()
+	User score POST requests are handled via AJAX post to add_score()
 
 	If no user, only displays average score.
 	'''
@@ -107,12 +106,12 @@ def beer_detail(request, beer_id):
 
 	if beer.beerscores.count() > 1:
 		context_dict['avg_score'] = int(round(beer.beerscores.aggregate(a = Avg('score'))['a']))
-		
+
 	if request.GET.get('edit') == 'True':
 			context_dict['edit'] = True
 
 	if user:
-		return render(request, 'pints_main/beer_detail_user.html', context_dict)		
+		return render(request, 'pints_main/beer_detail/beer_detail_user.html', context_dict)
 
 	return render(request, 'pints_main/beer_detail.html', context_dict)
 
@@ -191,7 +190,7 @@ def add_score(request, beer_id):
 
 			else:
 				response_data['result'] = 'error1'
-				response_data['error'] = 'Invalid score' 
+				response_data['error'] = 'Invalid score'
 
 
 		except TypeError:
@@ -206,7 +205,7 @@ def add_score(request, beer_id):
 		return HttpResponse(
 			json.dumps({"nothing to see": "this isn't happening"}),
 			content_type="application/json"
-			)		
+			)
 
 
 
@@ -283,11 +282,16 @@ def search(request):
 		# current page
 		p = context_dict['p']
 
-		results = BreweryDbObject(search_request)
-		context_dict['results'] = results
+		#results = BreweryDbObject(search_request)
+		context_dict['results'] = search_request.get('data')
 
-		last_page = int(results.numberOfPages)
-		if last_page > 1:
+        try:
+            last_page = int(search_request.get('numberOfPages'))
+
+        except TypeError:
+            last_page = 1
+
+        if last_page > 1:
 
 			if p >= num_pages:
 				pages = range(p, min(last_page, p + num_pages) +1)

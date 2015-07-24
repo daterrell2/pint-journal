@@ -1,151 +1,214 @@
-from django.shortcuts import render, redirect
-from pints_main.models import BeerScore, BeerScoreArchive
-from pints_main.forms import BeerScoreForm
+from django.shortcuts import render, redirect, HttpResponse
+from pints_main.models import BeerScore, Beer
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from utils.brewerydb import BreweryDb, BreweryDbObject
-from django.db.models import Avg
-import re
+from pints_user.model_utils import get_user
+from utils.url_params import get_param
+from django.db.models import Avg, Count
+import json
 
-@login_required
+def welcome(request):
+    '''
+    Redirects logged in users to homepage.
+    Otherwises renders cover page
+    '''
+    if request.user.is_authenticated():
+		return redirect('index')
+
+    return render(request, 'pints_main/welcome.html')
+
 def index(request):
 	'''
-	Looks for query string in url '?view=beer' or '?view=brewery' and renders
-	index.html with appropriate object. Default view is 'beer'
+	Generates sorted list of beers based on url query string.
+	Renders beer list either to grid template (index_grid.html)
+		or list template(index_list.html)
 	'''
 
-	if not request.user.is_authenticated:
-		user = None
+	user = get_user(request) # None or User object
 
-	else:
-		try:
-			user=User.objects.get(id=request.user.id)
-		except User.DoesNotExist:
-			user = None
-
-	scores = []
-	sort_choices = ['^-?score_date$', '^-?score$']
-	sort_pattern = '|'.join(sort_choices)
-	default_sort = '-score_date'
+	sort_choices = ['-score', 'score']
+	display_choices = ['grid', 'list']
+	view_choices = ['user', 'all']
 
 	# get url params
-	sort_param = request.GET.get('sort')
-	view_param = request.GET.get('view')
+	sort_param = get_param(request, 'sort', sort_choices, default='-score')
+	display_param = get_param(request, 'display', display_choices, default='grid')
+	view_param = get_param(request, 'view', view_choices, default='user')
 
-	if sort_param and re.match(sort_pattern, sort_param):
-		sort = sort_param
-	else:
-		sort = default_sort
-
-	if user and view_param != 'all':
-		scores = BeerScore.objects.filter(user=user)
-		if scores:
-			scores = scores.order_by(sort)[:6]
+	if user and view_param == 'user':
+		scores = user.beerscores.all().order_by(sort_param)
+		beers = [b.beer for b in scores]
 
 	else:
-		scores = BeerScore.objects.order_by(sort)[:6]
+		view_param = 'all'
+		beer_count = Beer.objects.annotate(num_scores=Count('beerscores')).filter(num_scores__gte=2) # only average beers with more than one score
+		beers = beer_count.annotate(score = Avg('beerscores__score')).order_by(sort_param)
 
 	beer_list = []
-	for score in scores:
-		beer = BreweryDb.beer(score.beer, {'withBreweries':'Y'})
-		if beer and beer.get('status') == 'success':
-			beer['data']['score'] = score
-			beer_list.append(BreweryDbObject(beer))
 
-	context_dict = {'beer_list': beer_list}
-	return render(request, 'pints_main/index.html', context_dict)
+	for beer in beers:
+		try:
+			user_score = beer.beerscores.get(user=user)
 
-@login_required
+		except BeerScore.DoesNotExist:
+			user_score = None
+
+		if beer.beerscores.count() >= 2:
+			avg_score = int(round(beer.beerscores.aggregate(avg_score = Avg('score'))['avg_score']))
+		else:
+			avg_score = None
+
+		# API call to BreweryDb
+		b = BreweryDb.beer(beer.beer_id, {'withBreweries':'Y'})
+		if b and b.get('status') == 'success':
+			b['data']['user_score'] = user_score
+			b['data']['avg_score'] = avg_score
+			beer_list.append(b)
+
+	context_dict = {'beer_list': beer_list, 'user' : user, 'view':view_param, 'display':display_param, 'sort':sort_param}
+	return render(request, 'pints_main/index_grid.html', context_dict)
+
 def beer_detail(request, beer_id):
 	'''
 	Renders page for a single beer.
 
-	If user has rated this beer, displays score and average score for all users.
+	If user is logged in, pulls in beer score/ button to add or edit score
+		via AJAX requests to get_score() and get_form().
 
-	If user has not rated, displays form for new score that submits back to this view.
+	User score POST requests are handled via AJAX post to add_score()
 
-	Takes GET paramerter 'edit'. If '?edit=TRUE' (and user has already rated this beer)
-		renders form with user's current score filled in as value.
-
-		Submitting this form updates score in DB and adds old score to BeerScoreArchive.
+	If no user, only displays average score.
 	'''
 
 	context_dict = {}
 
-	user=User.objects.get(id=request.user.id)
+	user=get_user(request) # None or user object
+	beer=Beer.objects.get_or_create(beer_id=beer_id)[0]
 
 	context_dict['user'] = user
-	context_dict['form_placeholder'] = 'score'
-	context_dict['edit'] = False
+	context_dict['beer'] = beer
 
-	if request.method == 'POST':
-		
-		edit_flag=False
+	beer_details = BreweryDb.beer(beer.beer_id, {'withBreweries':'Y'})
 
-		try:
-			new_score = BeerScore.objects.get(beer=beer_id, user=user)
-			old_score_val = new_score.score
-			edit_flag=True
+	if not beer_details or beer_details.get('status') != 'success':
+		return redirect('index')
 
-	
-		except BeerScore.DoesNotExist:
-			new_score = BeerScore(beer=beer_id, user=user)
-		
-		form = BeerScoreForm(request.POST)
+	context_dict['beer_details'] = beer_details
 
-		if form.is_valid():
-			form_score = form.save(commit=False)
-			new_score.score = form_score.score
+	try:
+		score = BeerScore.objects.get(beer=beer, user=user)
+		context_dict['form_placeholder'] = score
+		context_dict['beer_score'] = score
 
-			if not edit_flag:
-				new_score.user = user
-				new_score.beer = beer_id
-				new_score.save()
-			else:
-				new_score.save()
-				if new_score.score != old_score_val:
-					old_score = BeerScoreArchive(beer=beer_id, user=user, score=old_score_val)
-					old_score.save()
+	except BeerScore.DoesNotExist:
+		context_dict['beer_score'] = None
 
-			return redirect('/beer/' + beer_id)
+	if beer.beerscores.count() > 1:
+		context_dict['avg_score'] = int(round(beer.beerscores.aggregate(a = Avg('score'))['a']))
 
-		else:
-			context_dict['form_placeholder'] = request.POST.get('score')
-			print "INVALID!!!"
-			print form.errors
-
-	else:
-		form = BeerScoreForm()
-
-	context_dict['form'] = form
-
-	# Beer Details
-	beer = BreweryDb.beer(beer_id, {'withBreweries':'Y'})
-
-	if not beer or beer.get('status') != 'success':
-		return redirect('index')		
-
-	context_dict['beer'] = BreweryDbObject(beer)
-
-	# User score
-	beer_score = BeerScore.objects.filter(beer = beer_id, user = user)
-	if beer_score:
-		context_dict['beer_score'] = beer_score[0]
-		context_dict['form_placeholder'] = beer_score[0].score
-		if request.GET.get('edit') == 'True':
+	if request.GET.get('edit') == 'True':
 			context_dict['edit'] = True
 
-	# Average score
-	all_scores = BeerScore.objects.filter(beer=beer_id)
-	if all_scores:
-		 avg_score = all_scores.aggregate(Avg('score'))['score__avg']
-		 context_dict['avg_score'] = int(round(avg_score))
-	else:
-		context_dict['avg_score'] = None
+	if user:
+		return render(request, 'pints_main/beer_detail/beer_detail_user.html', context_dict)
 
 	return render(request, 'pints_main/beer_detail.html', context_dict)
 
+
+# change to post only
 @login_required
+def get_form(request, beer_id):
+	'''
+	returns html form snippet for AJAX request from beer_detail_user
+	'''
+	user = get_user(request)
+
+	try:
+		beer=Beer.objects.get(beer_id=beer_id)
+	except Beer.DoesNotExist:
+		beer=None
+
+	try:
+		beer_score = BeerScore.objects.get(beer=beer, user=user)
+	except BeerScore.DoesNotExist:
+		beer_score = None
+
+	return render(request, 'pints_main/beer_detail/beer_score_form.html', {'beer':beer, 'beer_score':beer_score})
+
+# change to post only
+@login_required
+def get_score(request, beer_id):
+	'''
+	returns html snippet with beer score as <p> element
+	for AJAX request from beer_detail_user
+	'''
+
+	user = get_user(request)
+	try:
+		beer = Beer.objects.get(beer_id = beer_id)
+	except Beer.DoesNotExist:
+		beer=None
+
+	if beer:
+		try:
+			beer_score = BeerScore.objects.get(beer=beer, user=user)
+		except BeerScore.DoesNotExist:
+			beer_score=None
+	else:
+		beer_score = None
+
+	return render(request, 'pints_main/beer_detail/beer_score.html', {'beer':beer, 'beer_score':beer_score})
+
+@login_required
+def add_score(request, beer_id):
+	'''
+	Handles AJAX request/ response for scores
+	'''
+
+	if request.method == 'POST':
+
+		print "POST!!"
+
+		user=User.objects.get(id=request.user.id)
+		beer=Beer.objects.get_or_create(beer_id=beer_id)[0]
+
+		response_data = {}
+
+		score_val = request.POST.get('the_post')
+
+		try:
+			score_val = int(score_val)
+			if score_val in range(101):
+				score = BeerScore.objects.get_or_create(beer=beer, user=user)[0]
+				score.score = score_val
+				score.save()
+
+				response_data['result'] = 'Success!'
+				response_data['score'] = str(score_val)
+				response_data['score_url'] = "/beer/"+beer_id+"/get_score"
+
+			else:
+				response_data['result'] = 'error1'
+				response_data['error'] = 'Invalid score'
+
+
+		except TypeError:
+			response_data['result'] = 'error2'
+			response_data['error'] = 'Invalid score'
+
+		return HttpResponse(
+			json.dumps(response_data),
+			content_type="application/json"
+			)
+	else:
+		return HttpResponse(
+			json.dumps({"nothing to see": "this isn't happening"}),
+			content_type="application/json"
+			)
+
+
+
 def brewery_detail(request, brewery_id):
 
 	context_dict = {}
@@ -159,7 +222,7 @@ def brewery_detail(request, brewery_id):
 		return redirect('index')
 
 	# get user detail
-	user=User.objects.get(id=request.user.id)
+	user=get_user(request)
 	context_dict['user'] = user
 
 	# get any beers for brewery + each beer's score
@@ -168,15 +231,14 @@ def brewery_detail(request, brewery_id):
 	if beers and beers.get('status') == 'success':
 
 		for b in beers['data']:
-			beer_id = b['id']
-			all_scores = BeerScore.objects.filter(beer=beer_id)
-			if all_scores:
-			 	avg_score = all_scores.aggregate(Avg('score'))['score__avg']
+			beer= Beer.objects.get_or_create(beer_id = b['id'])[0]
+			if beer.beerscores.count() > 1:
+			 	avg_score = beer.beerscores.aggregate(a = Avg('score'))['a']
 			 	b['avg_score'] = int(round(avg_score))
 			else:
 				b['avg_score'] = None
 
-			user_score = BeerScore.objects.filter(beer=beer_id, user=user)
+			user_score = BeerScore.objects.filter(beer=beer, user=user)
 
 			if user_score:
 				b['user_score']  = user_score[0].score
@@ -220,11 +282,16 @@ def search(request):
 		# current page
 		p = context_dict['p']
 
-		results = BreweryDbObject(search_request)
-		context_dict['results'] = results
+		#results = BreweryDbObject(search_request)
+		context_dict['results'] = search_request.get('data')
 
-		last_page = int(results.numberOfPages)
-		if last_page > 1:
+        try:
+            last_page = int(search_request.get('numberOfPages'))
+
+        except TypeError:
+            last_page = 1
+
+        if last_page > 1:
 
 			if p >= num_pages:
 				pages = range(p, min(last_page, p + num_pages) +1)
@@ -235,100 +302,3 @@ def search(request):
 	context_dict['pages'] = pages
 
 	return render(request, 'pints_main/search_results.html', context_dict)
-
-
-
-
-
-
-
-
-# @login_required
-# def add_brewery(request):
-# 	if request.method=='POST':
-# 		form = BreweryForm(request.POST)
-
-# 		if form.is_valid():
-# 			new_brewery = form.save(commit=True)
-# 			return redirect('/brewery/'+new_brewery.slug)
-
-# 		else:
-# 			print form.errors
-
-# 	else:
-# 		form = BreweryForm()
-
-# 	return render(request, 'pints_main/add_brewery.html', {'form':form})
-
-# @login_required
-# def add_beer(request, brewery_name_slug):
- 
-#  	try:
-# 		brewery = Brewery.objects.get(slug=brewery_name_slug)
-
-# 	except Brewery.DoesNotExist:
-# 		brewery = None
-
-# 	if request.method=='POST':
-# 		form = BeerForm(request.POST)
-
-# 		if form.is_valid():
-# 			if brewery:
-# 				beer = form.save(commit=False)
-# 				beer.brewery = brewery
-# 				beer.save()
-
-# 				return redirect('/beer/'+beer.slug)
-
-# 		else:
-# 			print form.errors
-
-# 	else:
-# 		form = BeerForm()
-
-# 	context_dict={'form':form, 'brewery':brewery}
-
-# 	return render(request, 'pints_main/add_beer.html', context_dict)
-
-# @login_required
-# def edit_beer(request, beer_name_slug):
-
-# 	try:
-# 		beer = Beer.objects.get(slug=beer_name_slug)
-
-# 	except Beer.DoesNotExist:
-# 		redirect('index')
-
-# 	if request.method=='POST':
-# 		form = BeerForm(request.POST, instance = beer)
-
-# 		if form.is_valid():
-# 				beer = form.save(commit=False)
-# 				beer.save()
-# 				return redirect(beer.get_absolute_url())
-
-# 		else:
-# 			print form.errors
-
-# 	else:
-# 		form = BeerForm(instance = beer)
-
-# 	context_dict={'form':form, 'beer':beer}
-
-# 	return render(request, 'pints_main/edit_beer.html', context_dict)
-
-# @login_required
-# def delete_beer(request, beer_name_slug):
-
-# 	try:
-# 		beer = Beer.objects.get(slug=beer_name_slug)
-# 		brewery = beer.brewery
-
-# 	except:
-# 		redirect('index')
-
-# 	if request.method=='POST':
-# 		beer.delete()
-# 		return redirect(brewery.get_absolute_url())
-# 	else:
-# 		return render(request, 'pints_main/delete_beer.html', {'beer':beer})

@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block css_block %}
+<link href="/static/css/index.css" rel="stylesheet">
+{% endblock %}
+
+{% load staticfiles %}
+
+{% block title %} Home {% endblock %}
+
+
+{% block body_block %}
+    {% if user %}
+        <div class="row">
+            <ul class="nav nav-tabs nav-justified">
+                {% if view == 'user' %}
+                <li role="presentation" class="active">
+                {% else %}
+                <li role="presentation">
+                {% endif %}
+                    <a href="{% url 'index' %}?view=user"> My Beers </a>
+                </li>
+
+                {% if view == 'all' %}
+                <li role="presentation" class="active">
+                {% else %}
+                <li role="presentation">
+                {% endif %}
+                    <a href="{% url 'index' %}?view=all"> Top Beers </a>
+                </li>
+                <!--<li role="presentation">-->
+                <!--    <a href="/">Recent Beers </a>-->
+                <!--</li>-->
+            </ul>
+        </div>
+    {% endif %}
+
+    {% block list_block %}
+    {% endblock %}
+
+{% endblock %}

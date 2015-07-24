@@ -8,8 +8,8 @@
 {% block body_block %}
         {% if results %}
 
-	            {% for i in results.data %}
-	            <a href="/{{ type }}/{{ i.id_ }}">
+	            {% for i in results %}
+	            <a href="/{{ type }}/{{ i.id }}">
 	            <div class="row">
 
 				      	<div class="col-xs-2">
@@ -23,7 +23,7 @@
             		    <h3>{{ i.name }}</h3>
 
             		    {% if type == 'beer' %}
-            		 	<a href = "/brewery/{{ i.breweries.0.id_ }}">{{ i.breweries.0.name }}</a>
+            		 	<a href = "/brewery/{{ i.breweries.0.id }}">{{ i.breweries.0.name }}</a>
             		 	{% endif %}
 				     </div>
 

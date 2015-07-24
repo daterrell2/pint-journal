@@ -1,6 +1,4 @@
 body {
-  padding-top: 40px;
-  padding-bottom: 40px;
   background-color: #eee;
 }
 
@@ -16,7 +14,7 @@ body {
 .form-signin .checkbox {
   font-weight: normal;
 }
-.form-signin .form-control {
+.form-signin .form-control{
   position: relative;
   height: auto;
   -webkit-box-sizing: border-box;
@@ -37,4 +35,10 @@ body {
   margin-bottom: 10px;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
+}
+
+.form-group {
+  position: relative;
+  width: auto;
+
 }

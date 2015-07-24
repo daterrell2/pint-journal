@@ -1,3 +1,29 @@
+'''
+This module wraps GET requests to brewerydb.com  API.
+It's adapted from the python service library linked to in the
+BreweryDb API documentation:
+
+    https://github.com/yarian/brewerydb
+
+The original script defines the simple and single_param endpoints as methods
+of the BreweryDb objects.
+
+A few features I added:
+    - Implemented requests_cache: API requests will be cached in CACHE_BACKEND (sqlite default)
+        until CACHE_EXPIRE_AFTER seconds have passed (1 day default)
+
+    - Added 'join_endpoints' for one-to-many requests.
+        For example, to return all locations for a brewery, you can call
+
+            BreweryDb.brewery_locations(<brewery_id>)
+
+        Which makes the following API request:
+
+            http://api.brewerydb.com/v2/<API_KEY>/brewery/<brewery_id>/locations
+
+'''
+
+
 import requests
 import requests_cache
 import __builtin__
@@ -40,7 +66,7 @@ class BreweryDb:
             return BreweryDb._get("/" + name + "/" + id, options)
         return _function
 
-    
+
     # my addition
     @staticmethod
     def __make_join_endpoint_fun(name):
@@ -70,7 +96,7 @@ class BreweryDb:
         for endpoint in single_param_endpoints:
             fun = BreweryDb.__make_singlearg_endpoint_fun(endpoint)
             setattr(BreweryDb, endpoint.replace('/', '_'), fun)
-        
+
         # my addition
         for endpoint in join_endpoints:
             fun = BreweryDb.__make_join_endpoint_fun(endpoint)
@@ -81,12 +107,12 @@ class BreweryDb:
 # my addition--potentially bad idea!!!
 class BreweryDbObject(object):
     '''
-    Unpacks API reutrned object (nested dict) into an object, with 
-    dict keys as attributes. Also recursively unpacks nested dicts 
+    Unpacks API reutrned object (nested dict) into an object, with
+    dict keys as attributes. Also recursively unpacks nested dicts
     as BreweryDbObjects
 
     Renames any attr that is  python keywords/ builtins to attr_
-    ''' 
+    '''
     def __init__(self, data = {}):
 
         for k, v in data.items():

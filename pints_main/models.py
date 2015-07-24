@@ -3,9 +3,16 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth.models import User
 from utils import brewerydb
 
+class Beer(models.Model):
+	beer_id = models.CharField(max_length=128, blank=False, unique=True)
+
+	def __unicode__(self):
+		return str(self.beer_id)
+
+
 class BeerScore(models.Model):
-	beer = models.CharField(max_length=128, blank=False) # id of beer in BreweryDB, called via API
-	user = models.ForeignKey(User, blank=False)
+	beer = models.ForeignKey(Beer, blank=False, related_name='beerscores')
+	user = models.ForeignKey(User, blank=False, related_name = 'beerscores')
 	score = models.IntegerField(
 		default=1,
         validators=[
@@ -21,12 +28,26 @@ class BeerScore(models.Model):
 	def __unicode__(self):
 		return str(self.score)
 
+	def save(self, *args, **kwargs):
+		'''
+		Automatically add old score to BeerScoreArchive
+		if different from new score
+		'''
+		if self.pk:
+			old_score = BeerScore.objects.get(pk=self.pk).score
+			if self.score != old_score:
+				archive = BeerScoreArchive(beer=self.beer, user=self.user, score=old_score)
+				archive.save()
+
+		super(BeerScore, self).save(*args, **kwargs)
+
+
 class BeerScoreArchive(models.Model):
 	'''
 	stores user's score history for each beer.
 	'''
-	beer = models.CharField(max_length=128, blank=False)
-	user = models.ForeignKey(User, blank=False)
+	beer = models.ForeignKey(Beer, blank=False, related_name='beerscore_archives')
+	user = models.ForeignKey(User, blank=False, related_name = 'beerscore_archives')
 	score = models.IntegerField(
 		default=1,
         validators=[

@@ -1,0 +1,47 @@
+{% extends 'index.html' %}
+
+{% load staticfiles %}
+
+{% block list_block %}
+
+    <div class="row">
+        {% if beer_list %}
+            {% for beer in beer_list %}
+                <div class="lg-3 col-md-4 col-sm-6 col-xs-12">
+                    <div class="dummy"></div>
+                    <div class="thumbnail">
+                        <a href = "/beer/{{ beer.data.id }}"><img src={{ beer.data.breweries.0.images.medium }} class="img-thumbnail" alt ="{{ beer.data.name }}" style:"size:150%"></a>
+        		    	<a href = "/beer/{{ beer.data.id }}"><h4>{{ beer.data.name }}</h4></a>
+                        <p> <small>by {{ beer.data.breweries.0.name }}</small></p>
+
+                        <p>
+                            {% if view == 'user' %}
+                                My Score: <strong>{{beer.data.user_score }}</strong> |  
+                            
+                                {% if beer.data.avg_score %}
+                                Average Score: <strong>{{beer.data.avg_score }}</strong>
+                                {% else %}
+                                Average Score: N/A
+                                {% endif %}
+
+                            {% else %}
+                                Average Score: <strong>{{beer.data.avg_score }}</strong>
+                                
+                                {% if beer.data.user_score %}
+                                | My Score: <strong>{{beer.data.user_score }}</strong>
+                                {% endif %}
+
+                            {% endif %}
+
+                        </p>
+
+                            
+                    </div>
+
+                </div>
+            {% endfor %}
+
+        {% endif %}
+    </div>
+
+{% endblock %}

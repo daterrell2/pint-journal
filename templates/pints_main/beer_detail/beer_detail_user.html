@@ -1,0 +1,26 @@
+{% extends 'pints_main/beer_detail.html' %}
+
+{% load staticfiles %}
+
+{% block title %}- {{ beer_details.data.name }} {% endblock %}
+
+{% block user_score_block %}
+    <h3> My Rating </h3>
+
+    <div id="score-content" data-form-url="{% url 'get_form' beer.beer_id %}">
+    </div>
+
+{% endblock %}
+
+{% block js_block %}
+<script>
+    $(document).ready(function(){
+        $.get("{% url 'get_score' beer.beer_id %}", function(data){
+        $("#score-content").html(data);
+        console.log("load was performed");
+        });  
+    });
+
+</script>
+
+{% endblock %}

@@ -212,26 +212,26 @@ def add_score(request, beer_id):
 
 
 def brewery_detail(request, brewery_id):
-    '''
-    Renders page for single brewery, listing all beers for that brewery
+	'''
+	Renders page for single brewery, listing all beers for that brewery
+	
+	ARGS:
+	    brewery_id: id of a single brewery in BreweryDB (there is currently no
+	                table for brewery in db)
+	
+	RETURNS:
+	    rendered brewery detail template with brewery details and all beers
+	    
+	'''
+	context_dict = {}
 
-    ARGS:
-        brewery_id: id of a single brewery in BreweryDB (there is currently no
-                    table for brewery in db)
+	# get brewery detail
+	brewery = BreweryDb.brewery(brewery_id)
 
-    RETURNS:
-        rendered brewery detail template with brewery details and all beers
-
-    '''
-    context_dict = {}
-
-    # get brewery detail
-    brewery = BreweryDb.brewery(brewery_id)
-
-    if brewery and brewery.get('status') == 'success':
-    	context_dict['brewery'] = BreweryDbObject(brewery)
-    else:
-    	return redirect('index')
+	if brewery and brewery.get('status') == 'success':
+		context_dict['brewery'] = BreweryDbObject(brewery)
+	else:
+		return redirect('index')
 
 	# get user detail
 	user=get_user(request)

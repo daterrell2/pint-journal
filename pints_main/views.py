@@ -21,8 +21,9 @@ def welcome(request):
 def index(request):
 	'''
 	Generates sorted list of beers based on url query string.
-	Renders beer list either to grid template (index_grid.html)
-		or list template(index_list.html)
+	Renders beer list to grid template (index_grid.html)
+
+    To-do: add alternate "list" template, determined by "display" querystring
 	'''
 
 	user = get_user(request) # None or User object
@@ -73,12 +74,15 @@ def beer_detail(request, beer_id):
 	'''
 	Renders page for a single beer.
 
-	If user is logged in, pulls in beer score/ button to add or edit score
-		via AJAX requests to get_score() and get_form().
+	ARGS:
+	    beer_id from url parameter
 
-	User score POST requests are handled via AJAX post to add_score()
+	RETURNS:
+	    If user is logged in, renders beer detail template with user's score
+	        - user score is handled via AJAX GET requests to get_score() and get_form()
+	        - user score POST requests (via AJAX) are handled by add_score()
 
-	If no user, only displays average score.
+	    If no user, renders beer detail template, only displaying average score.
 	'''
 
 	context_dict = {}
@@ -116,7 +120,6 @@ def beer_detail(request, beer_id):
 	return render(request, 'pints_main/beer_detail.html', context_dict)
 
 
-# change to post only
 @login_required
 def get_form(request, beer_id):
 	'''
@@ -136,7 +139,6 @@ def get_form(request, beer_id):
 
 	return render(request, 'pints_main/beer_detail/beer_score_form.html', {'beer':beer, 'beer_score':beer_score})
 
-# change to post only
 @login_required
 def get_score(request, beer_id):
 	'''
@@ -210,16 +212,26 @@ def add_score(request, beer_id):
 
 
 def brewery_detail(request, brewery_id):
+    '''
+    Renders page for single brewery, listing all beers for that brewery
 
-	context_dict = {}
+    ARGS:
+        brewery_id: id of a single brewery in BreweryDB (there is currently no
+                    table for brewery in db)
 
-	# get brewery detail
-	brewery = BreweryDb.brewery(brewery_id)
+    RETURNS:
+        rendered brewery detail template with brewery details and all beers
 
-	if brewery and brewery.get('status') == 'success':
-		context_dict['brewery'] = BreweryDbObject(brewery)
-	else:
-		return redirect('index')
+    '''
+    context_dict = {}
+
+    # get brewery detail
+    brewery = BreweryDb.brewery(brewery_id)
+
+    if brewery and brewery.get('status') == 'success':
+    	context_dict['brewery'] = BreweryDbObject(brewery)
+    else:
+    	return redirect('index')
 
 	# get user detail
 	user=get_user(request)
@@ -238,7 +250,7 @@ def brewery_detail(request, brewery_id):
 			else:
 				b['avg_score'] = None
 
-			user_score = BeerScore.objects.filter(beer=beer, user=user)
+			user_score = BeerScore.objects.filter(beer=beer, user=user) # user is None here if not logged in
 
 			if user_score:
 				b['user_score']  = user_score[0].score
@@ -254,36 +266,55 @@ def brewery_detail(request, brewery_id):
 
 
 def search(request):
-	context_dict = {}
+    '''
+    Search handled via API call to BreweryDb "search" endpoint
 
-	search_types=['beer', 'brewery']
-	search_params=['q', 'type', 'p']
+    Looks for querystring parameters to inform search. Values are passed on in
+    dictionary to API call:
 
-	pages = []
-	num_pages = 10
+        type: can be 'beer' or 'brewery'. Default is 'beer'.
+        q: user's query typed in search box. Value is passed on to API request
+        p: current page. Value is passed on to API request. Default is 1
 
-	search_dict = {k: request.GET.get(k) for k in search_params}
+    CONSTANTS:
+    num_pages: will display up to 10 page numbers below search results.
 
-	if search_dict['type'] not in search_types:
-		search_dict['type'] = search_types[0]
-	try:
-		search_dict['p'] = int(search_dict['p'])
-	except TypeError:
-		search_dict['p'] = 1
+    RETURNS:
+        Single page of search results, rendered into search results templates
 
-	context_dict = search_dict
+    '''
 
-	if search_dict['type'] == 'beer':
-		search_dict['withBreweries'] = 'Y'
+    context_dict = {}
 
-	search_request = BreweryDb.search(search_dict)
+    search_types=['beer', 'brewery']
+    search_params=['q', 'type', 'p']
 
-	if search_request and search_request.get('status') == 'success':
-		# current page
-		p = context_dict['p']
+    pages = []
 
-		#results = BreweryDbObject(search_request)
-		context_dict['results'] = search_request.get('data')
+    # How many page numbers to display below search results
+    num_pages = 10
+
+    search_dict = {k: request.GET.get(k) for k in search_params}
+
+    if search_dict['type'] not in search_types:
+    	search_dict['type'] = search_types[0]
+    try:
+    	search_dict['p'] = int(search_dict['p'])
+    except TypeError:
+    	search_dict['p'] = 1
+
+    context_dict = search_dict
+
+    if search_dict['type'] == 'beer':
+    	search_dict['withBreweries'] = 'Y'
+
+    search_request = BreweryDb.search(search_dict)
+
+    if search_request and search_request.get('status') == 'success':
+    	# current page, from url querystring
+    	p = context_dict['p']
+
+    	context_dict['results'] = search_request.get('data')
 
         try:
             last_page = int(search_request.get('numberOfPages'))
@@ -293,12 +324,12 @@ def search(request):
 
         if last_page > 1:
 
-			if p >= num_pages:
-				pages = range(p, min(last_page, p + num_pages) +1)
+    		if p >= num_pages:
+    			pages = range(p, min(last_page, p + num_pages) +1)
 
-			else:
-				pages = range(1, num_pages+1)
+    		else:
+    			pages = range(1, num_pages+1)
 
-	context_dict['pages'] = pages
+    context_dict['pages'] = pages
 
-	return render(request, 'pints_main/search_results.html', context_dict)
+    return render(request, 'pints_main/search_results.html', context_dict)

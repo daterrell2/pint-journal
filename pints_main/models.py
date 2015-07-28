@@ -1,13 +1,16 @@
 from django.db import models
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth.models import User
-from utils import brewerydb
 
 class Beer(models.Model):
-	beer_id = models.CharField(max_length=128, blank=False, unique=True)
+    '''
+    Holds data about beers pulled from BreweryDB via API
+    '''
+    # beer_id must be a valid beer id in BreweryDB API
+    beer_id = models.CharField(max_length=128, blank=False, unique=True)
 
-	def __unicode__(self):
-		return str(self.beer_id)
+    def __unicode__(self):
+        return str(self.beer_id)
 
 
 class BeerScore(models.Model):
@@ -55,7 +58,7 @@ class BeerScoreArchive(models.Model):
             MinValueValidator(1)
             ]
         )
-	score_date = models.DateTimeField(auto_now = True)	
+	score_date = models.DateTimeField(auto_now = True)
 
 	def __unicode__(self):
 		return str(self.score)

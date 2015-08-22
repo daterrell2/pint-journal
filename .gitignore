@@ -3,7 +3,7 @@
 ##################
 /pint_journal_project/settings.py
 /pint_journal_project/dev_settings.py
-
+/populate_db.py
 
 # Compiled source #
 ###################

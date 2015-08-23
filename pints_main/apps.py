@@ -6,8 +6,9 @@ class PintsMainConfig(AppConfig):
     name = 'pints_main'
     verbose_name = "pints_main"
     def ready(self):
-    	'''
-    	Configures BreweryDb API wrapper with API key.
-    	'''
-    	key = dev_settings.BREWERYDB_KEY
+        '''
+        Configures BreweryDb API wrapper with API key.
+        '''
+        key = dev_settings.BREWERYDB_KEY
         BreweryDb.configure(key)
+        

@@ -14,51 +14,52 @@ class Beer(models.Model):
 
 
 class BeerScore(models.Model):
-	beer = models.ForeignKey(Beer, blank=False, related_name='beerscores')
-	user = models.ForeignKey(User, blank=False, related_name = 'beerscores')
-	score = models.IntegerField(
-		default=1,
+    beer = models.ForeignKey(Beer, blank=False, related_name='beerscores')
+    user = models.ForeignKey(User, blank=False, related_name='beerscores')
+    score = models.IntegerField(
+        default=1,
         validators=[
             MaxValueValidator(100),
             MinValueValidator(1)
             ]
         )
-	score_date = models.DateTimeField(auto_now = True)
+    score_date = models.DateTimeField(auto_now=True)
 
-	class Meta:
-		unique_together = ('beer', 'user')
+    class Meta:
+        unique_together = ('beer', 'user')
 
-	def __unicode__(self):
-		return str(self.score)
+    def __unicode__(self):
+        return str(self.score)
 
-	def save(self, *args, **kwargs):
-		'''
-		Automatically add old score to BeerScoreArchive
-		if different from new score
-		'''
-		if self.pk:
-			old_score = BeerScore.objects.get(pk=self.pk).score
-			if self.score != old_score:
-				archive = BeerScoreArchive(beer=self.beer, user=self.user, score=old_score)
-				archive.save()
+    def save(self, *args, **kwargs):
+        '''
+        Automatically add old score to BeerScoreArchive
+        if different from new score
+        '''
+        if self.pk:
+            old_score = BeerScore.objects.get(pk=self.pk).score
+            if self.score != old_score:
+                archive = BeerScoreArchive(beer=self.beer, user=self.user, score=old_score)
+                archive.save()
 
-		super(BeerScore, self).save(*args, **kwargs)
+        super(BeerScore, self).save(*args, **kwargs)
 
 
 class BeerScoreArchive(models.Model):
-	'''
-	stores user's score history for each beer.
-	'''
-	beer = models.ForeignKey(Beer, blank=False, related_name='beerscore_archives')
-	user = models.ForeignKey(User, blank=False, related_name = 'beerscore_archives')
-	score = models.IntegerField(
-		default=1,
+    '''
+    stores user's score history for each beer.
+    '''
+    beer = models.ForeignKey(Beer, blank=False, related_name='beerscore_archives')
+    user = models.ForeignKey(User, blank=False, related_name='beerscore_archives')
+    score = models.IntegerField(
+        default=1,
         validators=[
             MaxValueValidator(100),
             MinValueValidator(1)
             ]
         )
-	score_date = models.DateTimeField(auto_now = True)
+    score_date = models.DateTimeField(auto_now=True)
 
-	def __unicode__(self):
-		return str(self.score)
+    def __unicode__(self):
+        return str(self.score)
+        

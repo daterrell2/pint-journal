@@ -86,7 +86,7 @@ class BreweryDb:
         return r.json()
 
     @staticmethod
-    def configure(apikey, baseuri=DEFAULT_BASE_URI, cache_name = CACHE_NAME, cache_backend = CACHE_BACKEND, cache_expire_after = CACHE_EXPIRE_AFTER):
+    def configure(apikey, baseuri=DEFAULT_BASE_URI):
         print "Configuring BreweryDb API wrapper"
         BreweryDb.API_KEY = apikey
         BreweryDb.BASE_URI = baseuri
@@ -102,7 +102,7 @@ class BreweryDb:
             fun = BreweryDb.__make_join_endpoint_fun(endpoint)
             setattr(BreweryDb, endpoint.replace('/', '_'), fun)
         print "Installing requests_cache"
-        requests_cache.install_cache(cache_name= cache_name, backend=cache_backend, expire_after=cache_expire_after)
+        requests_cache.install_cache(cache_name=CACHE_NAME, backend=CACHE_BACKEND, expire_after=CACHE_EXPIRE_AFTER)
 
 # my addition--potentially bad idea!!!
 class BreweryDbObject(object):

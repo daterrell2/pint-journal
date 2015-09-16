@@ -263,7 +263,7 @@ def brewery_detail(request, brewery_id):
             else:
                 beer_json['user_score'] = None
 
-        context_dict['beers'] = BreweryDbObject(beers)
+        context_dict['beers'] = beers
 
     else:
         context_dict['beers'] = None
